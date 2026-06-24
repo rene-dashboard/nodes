@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="21600">
+<title>XT1033 Node</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 8px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .card-title {
+    color: #58a6ff;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .value {
+    font-size: 18px;
+    color: #e6edf3;
+    font-weight: bold;
+  }
+  .small { font-size: 12px; color: #8b949e; }
+  .green { color: #3fb950; }
+  .yellow { color: #d29922; }
+  .red { color: #f85149; }
+  .radio-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3fb950;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .news-item {
+    border-bottom: 1px solid #21262d;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .news-item:last-child { border-bottom: none; }
+  .crypto-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #21262d;
+    font-size: 13px;
+  }
+  .crypto-row:last-child { border-bottom: none; }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HORA E IP -->
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">⏰ Hora Local</div>
+    <div class="value" id="hora">--:--:--</div>
+    <div class="small" id="data">---</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌐 IP Público</div>
+    <div class="value small" id="ip">carregando...</div>
+    <div class="small" id="ip-pais"></div>
+  </div>
+</div>
+
+<!-- RADIO -->
+<div class="card">
+  <div class="card-title">📻 Rádio</div>
+  <span class="radio-status" id="radio-dot"></span>
+  <span id="radio-label">BBC World Service — conectando...</span>
+  <br><br>
+  <div class="small" id="radio-info">Stream: bbcwsradio</div>
+  <audio id="radio" preload="none"></audio>
+</div>
+
+<!-- CLIMA -->
+<div class="card">
+  <div class="card-title">🌡️ Clima</div>
+  <div class="value" id="temp">--°C</div>
+  <div class="small" id="clima-desc">carregando...</div>
+</div>
+
+<!-- CRYPTO -->
+<div class="card">
+  <div class="card-title">💰 Cripto (USD)</div>
+  <div id="crypto-container">
+    <div class="small">carregando...</div>
+  </div>
+</div>
+
+<!-- NOTICIAS -->
+<div class="card">
+  <div class="card-title">📰 Notícias BBC</div>
+  <div id="news-container">
+    <div class="small">carregando...</div>
+  </div>
+</div>
+
+<!-- UPTIME -->
+<div class="card">
+  <div class="card-title">⚙️ Sistema</div>
+  <div class="small">Device: XT1033 | Node: xt1033</div>
+  <div class="small" id="uptime-label">Online há: calculando...</div>
+  <div class="small" id="reload-info"></div>
+</div>
+
+<script>
+// ─── CONFIGURAÇÕES ───────────────────────────────────────
+const RADIO_STREAM = 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service';
+const LAT = -23.550520;   // <- substitua pela sua latitude
+const LON = -46.633308;   // <- substitua pela sua longitude
+const RELOAD_HORAS = 6;
+// ─────────────────────────────────────────────────────────
+
+// HORA
+function atualizarHora() {
+  const agora = new Date();
+  document.getElementById('hora').textContent =
+    agora.toLocaleTimeString('pt-BR');
+  document.getElementById('data').textContent =
+    agora.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'short'});
+}
+setInterval(atualizarHora, 1000);
+atualizarHora();
+
+// UPTIME
+const startTime = Date.now();
+function atualizarUptime() {
+  const diff = Math.floor((Date.now() - startTime) / 1000);
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+  document.getElementById('uptime-label').textContent =
+    `Online há: ${h}h ${m}m ${s}s`;
+}
+setInterval(atualizarUptime, 1000);
+
+// RELOAD INFO
+const proxReload = new Date(Date.now() + RELOAD_HORAS * 3600000);
+document.getElementById('reload-info').textContent =
+  `Próximo reload: ${proxReload.toLocaleTimeString('pt-BR')}`;
+
+// IP PÚBLICO
+function buscarIP() {
+  fetch('https://ipapi.co/json/')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('ip').textContent = d.ip || 'erro';
+      document.getElementById('ip-pais').textContent =
+        `${d.city || ''}, ${d.country_name || ''}`;
+    })
+    .catch(() => {
+      document.getElementById('ip').textContent = 'sem resposta';
+    });
+}
+buscarIP();
+setInterval(buscarIP, 600000); // a cada 10 min
+
+// RÁDIO COM WATCHDOG
+const radio = document.getElementById('radio');
+const dot = document.getElementById('radio-dot');
+let radioOk = false;
+
+function iniciarRadio() {
+  radio.src = RADIO_STREAM;
+  radio.load();
+  radio.play().catch(() => {});
+}
+
+radio.addEventListener('playing', () => {
+  radioOk = true;
+  dot.style.background = '#3fb950';
+  document.getElementById('radio-label').textContent =
+    'BBC World Service — ao vivo ✓';
+});
+
+radio.addEventListener('error', () => {
+  radioOk = false;
+  dot.style.background = '#f85149';
+  document.getElementById('radio-label').textContent =
+    'Reconectando...';
+  setTimeout(iniciarRadio, 8000);
+});
+
+radio.addEventListener('stalled', () => {
+  setTimeout(iniciarRadio, 5000);
+});
+
+// Watchdog a cada 30s
+setInterval(() => {
+  if (radio.paused || radio.readyState === 0) {
+    radioOk = false;
+    dot.style.background = '#d29922';
+    iniciarRadio();
+  }
+}, 30000);
+
+iniciarRadio();
+
+// CLIMA — Open-Meteo (sem API key)
+function buscarClima() {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`;
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      const w = d.current_weather;
+      document.getElementById('temp').textContent = `${w.temperature}°C`;
+      const desc = interpretarClima(w.weathercode);
+      document.getElementById('clima-desc').textContent =
+        `${desc} | Vento: ${w.windspeed} km/h`;
+    })
+    .catch(() => {
+      document.getElementById('clima-desc').textContent = 'sem dados';
+    });
+}
+
+function interpretarClima(code) {
+  const map = {
+    0:'☀️ Céu limpo', 1:'🌤️ Poucas nuvens', 2:'⛅ Parcialmente nublado',
+    3:'☁️ Nublado', 45:'🌫️ Névoa', 48:'🌫️ Névoa com gelo',
+    51:'🌦️ Garoa leve', 53:'🌦️ Garoa', 61:'🌧️ Chuva leve',
+    63:'🌧️ Chuva', 65:'🌧️ Chuva forte', 80:'🌦️ Pancadas',
+    95:'⛈️ Tempestade', 99:'⛈️ Tempestade com granizo'
+  };
+  return map[code] || `Código ${code}`;
+}
+
+buscarClima();
+setInterval(buscarClima, 900000); // a cada 15 min
+
+// CRIPTO — CoinGecko
+function buscarCripto() {
+  const ids = 'bitcoin,ethereum,tether,solana,litecoin,binancecoin';
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      const moedas = [
+        { id: 'bitcoin',     nome: 'BTC' },
+        { id: 'ethereum',    nome: 'ETH' },
+        { id: 'tether',      nome: 'USDT' },
+        { id: 'solana',      nome: 'SOL' },
+        { id: 'litecoin',    nome: 'LTC' },
+        { id: 'binancecoin', nome: 'BNB' },
+      ];
+      let html = '';
+      moedas.forEach(m => {
+        const info = d[m.id];
+        if (!info) return;
+        const preco = info.usd.toLocaleString('en-US', {
+          style: 'currency', currency: 'USD'
+        });
+        const change = info.usd_24h_change?.toFixed(2) ?? '0';
+        const cor = parseFloat(change) >= 0 ? 'green' : 'red';
+        const sinal = parseFloat(change) >= 0 ? '+' : '';
+        html += `<div class="crypto-row">
+          <span>${m.nome}</span>
+          <span>${preco}</span>
+          <span class="${cor}">${sinal}${change}%</span>
+        </div>`;
+      });
+      document.getElementById('crypto-container').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('crypto-container').innerHTML =
+        '<div class="small red">API indisponível</div>';
+    });
+}
+
+buscarCripto();
+setInterval(buscarCripto, 300000); // a cada 5 min
+
+// NOTICIAS — BBC via rss2json
+function buscarNoticias() {
+  const rss = 'https://feeds.bbci.co.uk/news/world/rss.xml';
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=5`;
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      if (!d.items) return;
+      let html = '';
+      d.items.forEach(item => {
+        html += `<div class="news-item">
+          <span class="small yellow">▸</span> ${item.title}
+        </div>`;
+      });
+      document.getElementById('news-container').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('news-container').innerHTML =
+        '<div class="small">sem notícias</div>';
+    });
+}
+
+buscarNoticias();
+setInterval(buscarNoticias, 600000); // a cada 10 min
+
+</script>
+</body>
+  </html>
