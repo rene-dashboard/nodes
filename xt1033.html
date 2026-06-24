@@ -28,27 +28,71 @@
     letter-spacing: 1px;
     margin-bottom: 6px;
   }
-  .value {
-    font-size: 18px;
-    color: #e6edf3;
-    font-weight: bold;
-  }
+  .value { font-size: 18px; color: #e6edf3; font-weight: bold; }
   .small { font-size: 12px; color: #8b949e; }
   .green { color: #3fb950; }
   .yellow { color: #d29922; }
   .red { color: #f85149; }
-  .radio-status {
+  .radio-dot {
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: #3fb950;
     margin-right: 6px;
     animation: pulse 2s infinite;
   }
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    0%,100% { opacity:1; } 50% { opacity:0.3; }
+  }
+  .radio-nome {
+    font-size: 13px;
+    color: #e6edf3;
+    font-weight: bold;
+    margin: 6px 0 2px;
+  }
+  .radio-qualidade {
+    font-size: 11px;
+    color: #8b949e;
+    margin-bottom: 8px;
+  }
+  .radio-controles {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 12px;
+  }
+  .btn:active { background: #30363d; }
+  .btn-play {
+    background: #1f6feb;
+    border-color: #388bfd;
+    color: #fff;
+    font-weight: bold;
+  }
+  .btn-play.pausado {
+    background: #21262d;
+    border-color: #f85149;
+    color: #f85149;
+  }
+  .select-estacao {
+    width: 100%;
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    margin-top: 6px;
   }
   .news-item {
     border-bottom: 1px solid #21262d;
@@ -65,11 +109,7 @@
     font-size: 13px;
   }
   .crypto-row:last-child { border-bottom: none; }
-  .grid2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 </style>
 </head>
 <body>
@@ -90,11 +130,29 @@
 
 <!-- RADIO -->
 <div class="card">
-  <div class="card-title">📻 Rádio</div>
-  <span class="radio-status" id="radio-dot"></span>
-  <span id="radio-label">BBC World Service — conectando...</span>
-  <br><br>
-  <div class="small" id="radio-info">Stream: bbcwsradio</div>
+  <div class="card-title">
+    📻 Rádio
+    <span style="float:right;color:#8b949e;font-size:10px" id="radio-indice"></span>
+  </div>
+
+  <div>
+    <span class="radio-dot" id="radio-dot"></span>
+    <span id="radio-status-txt">conectando...</span>
+  </div>
+
+  <div class="radio-nome" id="radio-nome">---</div>
+  <div class="radio-qualidade" id="radio-qualidade"></div>
+
+  <!-- Select de estações -->
+  <select class="select-estacao" id="select-estacao" onchange="trocarPorSelect(this.value)"></select>
+
+  <!-- Controles -->
+  <div class="radio-controles">
+    <button class="btn" onclick="anterior()">⏮ Ant</button>
+    <button class="btn btn-play" id="btn-play" onclick="togglePlay()">⏸ Pausar</button>
+    <button class="btn" onclick="proxima()">Próx ⏭</button>
+  </div>
+
   <audio id="radio" preload="none"></audio>
 </div>
 
@@ -108,20 +166,16 @@
 <!-- CRYPTO -->
 <div class="card">
   <div class="card-title">💰 Cripto (USD)</div>
-  <div id="crypto-container">
-    <div class="small">carregando...</div>
-  </div>
+  <div id="crypto-container"><div class="small">carregando...</div></div>
 </div>
 
 <!-- NOTICIAS -->
 <div class="card">
   <div class="card-title">📰 Notícias BBC</div>
-  <div id="news-container">
-    <div class="small">carregando...</div>
-  </div>
+  <div id="news-container"><div class="small">carregando...</div></div>
 </div>
 
-<!-- UPTIME -->
+<!-- SISTEMA -->
 <div class="card">
   <div class="card-title">⚙️ Sistema</div>
   <div class="small">Device: XT1033 | Node: xt1033</div>
@@ -130,42 +184,166 @@
 </div>
 
 <script>
-// ─── CONFIGURAÇÕES ───────────────────────────────────────
-const RADIO_STREAM = 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service';
-const LAT = -23.550520;   // <- substitua pela sua latitude
-const LON = -46.633308;   // <- substitua pela sua longitude
+// ─── CONFIGURAÇÕES ────────────────────────────────────────
+const LAT = -23.55;
+const LON = -46.63;
 const RELOAD_HORAS = 6;
+
+// LISTA DE ESTAÇÕES
+const ESTACOES = [
+  // BBC (padrão original)
+  { nome: 'BBC World Service',       qualidade: 'MP3 · News',
+    url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
+
+  // Classic Rock
+  { nome: 'RADIO BOB Classic Rock',  qualidade: 'MP3 192kbps',
+    url: 'https://streams.radiobob.de/bob-classicrock/mp3-192/streams.radiobob.de/' },
+  { nome: 'RADIO BOB Classic Rock',  qualidade: 'MP3 128kbps',
+    url: 'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
+  { nome: 'RADIO BOB Classic Rock',  qualidade: 'AAC 64kbps',
+    url: 'https://streams.radiobob.de/bob-classicrock/aac-64/streams.radiobob.de/' },
+  { nome: 'RADIO BOB National',      qualidade: 'MP3 192kbps',
+    url: 'https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/' },
+  { nome: 'RADIO BOB National',      qualidade: 'MP3 128kbps',
+    url: 'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
+  { nome: 'STAR FM Classic Rock',    qualidade: 'MP3 192kbps',
+    url: 'https://stream.starfm.de/classic/mp3-192/stream.starfm.de/' },
+  { nome: 'STAR FM Classic Rock',    qualidade: 'MP3 128kbps',
+    url: 'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
+  { nome: 'STAR FM Classic Rock',    qualidade: 'AAC 64kbps',
+    url: 'https://stream.starfm.de/classic/aac-64/stream.starfm.de/' },
+  { nome: 'STAR FM Country Rock',    qualidade: 'MP3 192kbps',
+    url: 'https://stream.starfm.de/country/mp3-192/stream.starfm.de/' },
+  { nome: 'STAR FM Country Rock',    qualidade: 'MP3 128kbps',
+    url: 'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
+  { nome: 'GotRadio Classic Rock',   qualidade: 'AAC · HLS',
+    url: 'https://pureplay.cdnstream1.com/6012_64.aac/playlist.m3u8' },
+  { nome: 'Choice Classic Rock',     qualidade: 'MP3 · Stream',
+    url: 'http://streamer.radio.co/s66f2626b4/listen.m3u' },
+
+  // Metal / Hard Rock
+  { nome: 'Big R Radio 80s Metal',   qualidade: 'MP3 128kbps',
+    url: 'http://bigrradio.cdnstream1.com/5186_128' },
+  { nome: 'Big R Radio 90s Alt Rock',qualidade: 'MP3 128kbps',
+    url: 'http://bigrradio.cdnstream1.com/5187_128' },
+];
 // ─────────────────────────────────────────────────────────
 
-// HORA
+// Estado do rádio
+let estacaoAtual = 0;
+let tocando = true;
+
+// Popular select
+const sel = document.getElementById('select-estacao');
+ESTACOES.forEach((e, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = `${e.nome} — ${e.qualidade}`;
+  sel.appendChild(opt);
+});
+
+// Atualizar UI da estação
+function atualizarUI() {
+  const e = ESTACOES[estacaoAtual];
+  document.getElementById('radio-nome').textContent = e.nome;
+  document.getElementById('radio-qualidade').textContent = e.qualidade;
+  document.getElementById('radio-indice').textContent =
+    `${estacaoAtual + 1}/${ESTACOES.length}`;
+  sel.value = estacaoAtual;
+}
+
+// Carregar e tocar estação
+const radio = document.getElementById('radio');
+function carregarEstacao(idx) {
+  estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
+  radio.src = ESTACOES[estacaoAtual].url;
+  radio.load();
+  if (tocando) radio.play().catch(() => {});
+  atualizarUI();
+  setStatus('amarelo', 'conectando...');
+}
+
+function proxima()   { carregarEstacao(estacaoAtual + 1); }
+function anterior()  { carregarEstacao(estacaoAtual - 1); }
+function trocarPorSelect(idx) { carregarEstacao(parseInt(idx)); }
+
+function togglePlay() {
+  if (radio.paused) {
+    tocando = true;
+    radio.play().catch(() => {});
+    document.getElementById('btn-play').textContent = '⏸ Pausar';
+    document.getElementById('btn-play').classList.remove('pausado');
+  } else {
+    tocando = false;
+    radio.pause();
+    document.getElementById('btn-play').textContent = '▶ Tocar';
+    document.getElementById('btn-play').classList.add('pausado');
+    setStatus('vermelho', 'pausado');
+  }
+}
+
+function setStatus(cor, txt) {
+  const dot = document.getElementById('radio-dot');
+  const cores = { verde:'#3fb950', amarelo:'#d29922', vermelho:'#f85149' };
+  dot.style.background = cores[cor] || cores.verde;
+  document.getElementById('radio-status-txt').textContent = txt;
+}
+
+// Eventos do audio
+radio.addEventListener('playing', () => {
+  setStatus('verde', 'ao vivo ✓');
+  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  document.getElementById('btn-play').classList.remove('pausado');
+  tocando = true;
+});
+radio.addEventListener('error', () => {
+  setStatus('vermelho', 'erro — reconectando em 8s...');
+  setTimeout(() => { if (tocando) carregarEstacao(estacaoAtual); }, 8000);
+});
+radio.addEventListener('stalled', () => {
+  setStatus('amarelo', 'buffering...');
+  setTimeout(() => { if (tocando) carregarEstacao(estacaoAtual); }, 5000);
+});
+
+// Watchdog a cada 30s
+setInterval(() => {
+  if (tocando && (radio.paused || radio.readyState === 0)) {
+    setStatus('amarelo', 'watchdog — reiniciando...');
+    carregarEstacao(estacaoAtual);
+  }
+}, 30000);
+
+// Iniciar BBC por padrão
+carregarEstacao(0);
+
+// ─── HORA ────────────────────────────────────────────────
 function atualizarHora() {
   const agora = new Date();
   document.getElementById('hora').textContent =
     agora.toLocaleTimeString('pt-BR');
   document.getElementById('data').textContent =
-    agora.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'short'});
+    agora.toLocaleDateString('pt-BR',
+      { weekday:'short', day:'2-digit', month:'short' });
 }
 setInterval(atualizarHora, 1000);
 atualizarHora();
 
-// UPTIME
+// ─── UPTIME ───────────────────────────────────────────────
 const startTime = Date.now();
-function atualizarUptime() {
-  const diff = Math.floor((Date.now() - startTime) / 1000);
-  const h = Math.floor(diff / 3600);
-  const m = Math.floor((diff % 3600) / 60);
-  const s = diff % 60;
+setInterval(() => {
+  const d = Math.floor((Date.now() - startTime) / 1000);
+  const h = Math.floor(d / 3600);
+  const m = Math.floor((d % 3600) / 60);
+  const s = d % 60;
   document.getElementById('uptime-label').textContent =
     `Online há: ${h}h ${m}m ${s}s`;
-}
-setInterval(atualizarUptime, 1000);
+}, 1000);
 
-// RELOAD INFO
 const proxReload = new Date(Date.now() + RELOAD_HORAS * 3600000);
 document.getElementById('reload-info').textContent =
   `Próximo reload: ${proxReload.toLocaleTimeString('pt-BR')}`;
 
-// IP PÚBLICO
+// ─── IP PÚBLICO ───────────────────────────────────────────
 function buscarIP() {
   fetch('https://ipapi.co/json/')
     .then(r => r.json())
@@ -174,115 +352,57 @@ function buscarIP() {
       document.getElementById('ip-pais').textContent =
         `${d.city || ''}, ${d.country_name || ''}`;
     })
-    .catch(() => {
-      document.getElementById('ip').textContent = 'sem resposta';
-    });
+    .catch(() => { document.getElementById('ip').textContent = 'offline'; });
 }
 buscarIP();
-setInterval(buscarIP, 600000); // a cada 10 min
+setInterval(buscarIP, 600000);
 
-// RÁDIO COM WATCHDOG
-const radio = document.getElementById('radio');
-const dot = document.getElementById('radio-dot');
-let radioOk = false;
-
-function iniciarRadio() {
-  radio.src = RADIO_STREAM;
-  radio.load();
-  radio.play().catch(() => {});
-}
-
-radio.addEventListener('playing', () => {
-  radioOk = true;
-  dot.style.background = '#3fb950';
-  document.getElementById('radio-label').textContent =
-    'BBC World Service — ao vivo ✓';
-});
-
-radio.addEventListener('error', () => {
-  radioOk = false;
-  dot.style.background = '#f85149';
-  document.getElementById('radio-label').textContent =
-    'Reconectando...';
-  setTimeout(iniciarRadio, 8000);
-});
-
-radio.addEventListener('stalled', () => {
-  setTimeout(iniciarRadio, 5000);
-});
-
-// Watchdog a cada 30s
-setInterval(() => {
-  if (radio.paused || radio.readyState === 0) {
-    radioOk = false;
-    dot.style.background = '#d29922';
-    iniciarRadio();
-  }
-}, 30000);
-
-iniciarRadio();
-
-// CLIMA — Open-Meteo (sem API key)
+// ─── CLIMA ────────────────────────────────────────────────
 function buscarClima() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`;
-  fetch(url)
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true`)
     .then(r => r.json())
     .then(d => {
       const w = d.current_weather;
       document.getElementById('temp').textContent = `${w.temperature}°C`;
-      const desc = interpretarClima(w.weathercode);
       document.getElementById('clima-desc').textContent =
-        `${desc} | Vento: ${w.windspeed} km/h`;
+        `${interpretarClima(w.weathercode)} | Vento: ${w.windspeed} km/h`;
     })
-    .catch(() => {
-      document.getElementById('clima-desc').textContent = 'sem dados';
-    });
+    .catch(() => { document.getElementById('clima-desc').textContent = 'sem dados'; });
 }
-
-function interpretarClima(code) {
-  const map = {
-    0:'☀️ Céu limpo', 1:'🌤️ Poucas nuvens', 2:'⛅ Parcialmente nublado',
-    3:'☁️ Nublado', 45:'🌫️ Névoa', 48:'🌫️ Névoa com gelo',
-    51:'🌦️ Garoa leve', 53:'🌦️ Garoa', 61:'🌧️ Chuva leve',
-    63:'🌧️ Chuva', 65:'🌧️ Chuva forte', 80:'🌦️ Pancadas',
-    95:'⛈️ Tempestade', 99:'⛈️ Tempestade com granizo'
+function interpretarClima(c) {
+  const m = {
+    0:'☀️ Céu limpo',1:'🌤️ Poucas nuvens',2:'⛅ Parcialmente nublado',
+    3:'☁️ Nublado',45:'🌫️ Névoa',48:'🌫️ Névoa',51:'🌦️ Garoa leve',
+    53:'🌦️ Garoa',61:'🌧️ Chuva leve',63:'🌧️ Chuva',65:'🌧️ Chuva forte',
+    80:'🌦️ Pancadas',95:'⛈️ Tempestade',99:'⛈️ Tempestade'
   };
-  return map[code] || `Código ${code}`;
+  return m[c] || `Cód ${c}`;
 }
-
 buscarClima();
-setInterval(buscarClima, 900000); // a cada 15 min
+setInterval(buscarClima, 900000);
 
-// CRIPTO — CoinGecko
+// ─── CRIPTO ───────────────────────────────────────────────
 function buscarCripto() {
   const ids = 'bitcoin,ethereum,tether,solana,litecoin,binancecoin';
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
-  fetch(url)
+  fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
     .then(r => r.json())
     .then(d => {
       const moedas = [
-        { id: 'bitcoin',     nome: 'BTC' },
-        { id: 'ethereum',    nome: 'ETH' },
-        { id: 'tether',      nome: 'USDT' },
-        { id: 'solana',      nome: 'SOL' },
-        { id: 'litecoin',    nome: 'LTC' },
-        { id: 'binancecoin', nome: 'BNB' },
+        {id:'bitcoin',nome:'BTC'},{id:'ethereum',nome:'ETH'},
+        {id:'tether',nome:'USDT'},{id:'solana',nome:'SOL'},
+        {id:'litecoin',nome:'LTC'},{id:'binancecoin',nome:'BNB'},
       ];
       let html = '';
       moedas.forEach(m => {
-        const info = d[m.id];
-        if (!info) return;
-        const preco = info.usd.toLocaleString('en-US', {
-          style: 'currency', currency: 'USD'
-        });
-        const change = info.usd_24h_change?.toFixed(2) ?? '0';
-        const cor = parseFloat(change) >= 0 ? 'green' : 'red';
-        const sinal = parseFloat(change) >= 0 ? '+' : '';
+        const info = d[m.id]; if (!info) return;
+        const preco = info.usd.toLocaleString('en-US',
+          {style:'currency',currency:'USD'});
+        const ch = (info.usd_24h_change || 0).toFixed(2);
+        const cor = parseFloat(ch) >= 0 ? 'green' : 'red';
+        const sinal = parseFloat(ch) >= 0 ? '+' : '';
         html += `<div class="crypto-row">
-          <span>${m.nome}</span>
-          <span>${preco}</span>
-          <span class="${cor}">${sinal}${change}%</span>
-        </div>`;
+          <span>${m.nome}</span><span>${preco}</span>
+          <span class="${cor}">${sinal}${ch}%</span></div>`;
       });
       document.getElementById('crypto-container').innerHTML = html;
     })
@@ -291,35 +411,28 @@ function buscarCripto() {
         '<div class="small red">API indisponível</div>';
     });
 }
-
 buscarCripto();
-setInterval(buscarCripto, 300000); // a cada 5 min
+setInterval(buscarCripto, 300000);
 
-// NOTICIAS — BBC via rss2json
+// ─── NOTÍCIAS ─────────────────────────────────────────────
 function buscarNoticias() {
   const rss = 'https://feeds.bbci.co.uk/news/world/rss.xml';
-  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=5`;
-  fetch(url)
+  fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=5`)
     .then(r => r.json())
     .then(d => {
       if (!d.items) return;
-      let html = '';
-      d.items.forEach(item => {
-        html += `<div class="news-item">
-          <span class="small yellow">▸</span> ${item.title}
-        </div>`;
-      });
-      document.getElementById('news-container').innerHTML = html;
+      document.getElementById('news-container').innerHTML =
+        d.items.map(i =>
+          `<div class="news-item"><span class="yellow">▸</span> ${i.title}</div>`
+        ).join('');
     })
     .catch(() => {
       document.getElementById('news-container').innerHTML =
         '<div class="small">sem notícias</div>';
     });
 }
-
 buscarNoticias();
-setInterval(buscarNoticias, 600000); // a cada 10 min
-
+setInterval(buscarNoticias, 600000);
 </script>
 </body>
-  </html>
+</html>
