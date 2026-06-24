@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nodes Dashboard</title>
+  <style>
+    body {
+      background: #0d1117;
+      color: #58a6ff;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 80px;
+      font-size: 1.4em;
+    }
+  </style>
+</head>
+<body>
+  <h1>✅ GitHub Pages funcionando</h1>
+  <p>Base do dashboard de nodes pronta.</p>
+  <p id="hora"></p>
+  <script>
+    setInterval(() => {
+      document.getElementById('hora').textContent =
+        new Date().toLocaleString('pt-BR');
+    }, 1000);
+  </script>
+</body>
+</html>
