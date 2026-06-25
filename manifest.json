@@ -1,0 +1,27 @@
+{
+  "name": "Nodes Dashboard",
+  "short_name": "Nodes",
+  "description": "Dashboard permanente para nodes de renda passiva",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e1.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e1.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
