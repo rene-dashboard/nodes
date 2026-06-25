@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="21600">
+<title>GALAXY-A02S Node</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0d1117;
+    color:#c9d1d9;
+    font-family:monospace;
+    font-size:14px;
+    padding:8px;
+  }
+  .card {
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:6px;
+    padding:10px;
+    margin-bottom:8px;
+  }
+  .card-title {
+    color:#58a6ff;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:6px;
+  }
+  .value { font-size:18px; color:#e6edf3; font-weight:bold; }
+  .small { font-size:12px; color:#8b949e; }
+  .green { color:#3fb950; }
+  .yellow { color:#d29922; }
+  .red { color:#f85149; }
+  .blue { color:#58a6ff; }
+  .orange { color:#f0883e; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .radio-dot {
+    display:inline-block;
+    width:8px; height:8px;
+    border-radius:50%;
+    background:#3fb950;
+    margin-right:6px;
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .radio-nome { font-size:13px; color:#e6edf3; font-weight:bold; margin:6px 0 2px; }
+  .radio-qualidade { font-size:11px; color:#8b949e; margin-bottom:8px; }
+  .radio-controles { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .btn {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:6px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:12px;
+  }
+  .btn:active { background:#30363d; }
+  .btn-play {
+    background:#1f6feb;
+    border-color:#388bfd;
+    color:#fff;
+    font-weight:bold;
+  }
+  .btn-play.pausado {
+    background:#21262d;
+    border-color:#f85149;
+    color:#f85149;
+  }
+  .select-estacao {
+    width:100%;
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:6px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:12px;
+    margin-top:6px;
+  }
+  .crypto-row {
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+    border-bottom:1px solid #21262d;
+    font-size:13px;
+  }
+  .crypto-row:last-child { border-bottom:none; }
+  .news-item {
+    border-bottom:1px solid #21262d;
+    padding:6px 0;
+    font-size:12px;
+    line-height:1.4;
+  }
+  .news-item:last-child { border-bottom:none; }
+  .video-wrapper {
+    position:relative;
+    width:100%;
+    padding-bottom:56.25%;
+    height:0;
+    overflow:hidden;
+    border-radius:4px;
+  }
+  .video-wrapper iframe {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    border:0;
+  }
+  .clima-temp { font-size:32px; font-weight:bold; color:#e6edf3; }
+  .clima-info { font-size:12px; color:#8b949e; margin-top:4px; }
+  .node-info-row {
+    display:flex;
+    justify-content:space-between;
+    padding:3px 0;
+    border-bottom:1px solid #21262d;
+    font-size:12px;
+  }
+  .node-info-row:last-child { border-bottom:none; }
+  .badge {
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:3px;
+    font-size:10px;
+    font-weight:bold;
+    margin-right:4px;
+    margin-bottom:4px;
+  }
+  .badge-green  { background:#1a3a1a; color:#3fb950; border:1px solid #3fb950; }
+  .badge-blue   { background:#0d2137; color:#58a6ff; border:1px solid #58a6ff; }
+  .badge-yellow { background:#2d2000; color:#d29922; border:1px solid #d29922; }
+  .badge-orange { background:#2d1500; color:#f0883e; border:1px solid #f0883e; }
+  .badge-red    { background:#2d0d0d; color:#f85149; border:1px solid #f85149; }
+  .alerta {
+    background:#2d1a00;
+    border:1px solid #f0883e;
+    border-radius:4px;
+    padding:8px;
+    font-size:12px;
+    color:#f0883e;
+    margin-top:6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPO -->
+<div class="grid3">
+  <div class="card">
+    <div class="card-title">⏰ Hora</div>
+    <div class="value" id="hora">--:--:--</div>
+    <div class="small" id="data">---</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌐 IP Público</div>
+    <div class="small" id="ip">carregando...</div>
+    <div class="small" id="ip-pais"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚙️ Sistema</div>
+    <div class="small">A02S · Android 12</div>
+    <div class="small">SD450 · 3GB RAM</div>
+    <div class="small" id="uptime-label">0h 0m 0s</div>
+  </div>
+</div>
+
+<!-- NODE INFO -->
+<div class="card">
+  <div class="card-title">📱 Node Info — GALAXY-A02S</div>
+  <div class="grid2">
+    <div>
+      <div class="node-info-row">
+        <span class="small blue">Hostname</span>
+        <span class="small">galaxy-a02s</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">Tailscale</span>
+        <span class="small">galaxy-a02s.tailae532e.ts.net</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">IPv4</span>
+        <span class="small">100.83.183.90</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">SO</span>
+        <span class="small">Android 12 · Sem root</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">CPU</span>
+        <span class="small">Snapdragon 450</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">RAM</span>
+        <span class="small">3 GB</span>
+      </div>
+      <div class="node-info-row">
+        <span class="small blue">Armazenamento</span>
+        <span class="small">32 GB</span>
+      </div>
+    </div>
+    <div>
+      <div style="margin-bottom:6px">
+        <span class="badge badge-green">● ONLINE</span>
+        <span class="badge badge-red">SEM ROOT</span>
+      </div>
+      <div class="small" style="margin-bottom:4px">Apps ativos:</div>
+      <span class="badge badge-blue">Honeygain</span>
+      <span class="badge badge-blue">EarnApp</span>
+      <span class="badge badge-blue">Tailscale</span>
+      <span class="badge badge-blue">OpenSSH</span>
+      <span class="badge badge-blue">Termux</span>
+      <span class="badge badge-blue">mpv</span>
+      <div class="small" style="margin-top:6px;margin-bottom:4px">Scripts:</div>
+      <span class="badge badge-yellow">radio.sh</span>
+      <div class="alerta">
+        ⚠️ Android 12 encerra Termux/mpv eventualmente.<br>
+        ROM 64bit + root em avaliação.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RADIO + CLIMA -->
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">
+      📻 Rádio
+      <span style="float:right;color:#8b949e;font-size:10px" id="radio-indice"></span>
+    </div>
+    <div>
+      <span class="radio-dot" id="radio-dot"></span>
+      <span id="radio-status-txt">conectando...</span>
+    </div>
+    <div class="radio-nome" id="radio-nome">---</div>
+    <div class="radio-qualidade" id="radio-qualidade"></div>
+    <select class="select-estacao" id="select-estacao"
+            onchange="trocarPorSelect(this.value)"></select>
+    <div class="radio-controles">
+      <button class="btn" onclick="anterior()">⏮</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">⏸ Pausar</button>
+      <button class="btn" onclick="proxima()">⏭</button>
+    </div>
+    <audio id="radio" preload="none"></audio>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌡️ Clima</div>
+    <div class="clima-temp" id="temp">--°C</div>
+    <div class="clima-info" id="clima-desc">carregando...</div>
+    <div class="clima-info" id="clima-vento"></div>
+    <div class="clima-info" id="clima-umidade"></div>
+    <div class="clima-info" id="clima-chuva"></div>
+    <br>
+    <div class="card-title">📅 Próximas horas</div>
+    <div id="clima-horas" class="small"></div>
+  </div>
+</div>
+
+<!-- CRIPTO + NOTICIAS -->
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">💰 Cripto (USD)</div>
+    <div id="crypto-container"><div class="small">carregando...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📰 Notícias BBC</div>
+    <div id="news-container"><div class="small">carregando...</div></div>
+  </div>
+</div>
+
+<!-- VIDEO -->
+<div class="card">
+  <div class="card-title">🎬 Vídeo</div>
+  <div class="video-wrapper">
+    <iframe id="yt-frame"
+      src="https://www.youtube.com/embed/DWcJFNfaw9c?autoplay=1&mute=1&loop=1&playlist=DWcJFNfaw9c&controls=0&rel=0"
+      allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+    <button class="btn" onclick="trocarVideo('DWcJFNfaw9c')">📺 Cartoons 80s/90s</button>
+    <button class="btn" onclick="trocarVideo('2XID_W4neJo')">🔥 Lareira</button>
+    <button class="btn" onclick="trocarVideo('xNN7iTA57jM')">🌊 Oceano</button>
+    <button class="btn" onclick="trocarVideo('rUxyKA_-grg')">🌿 Floresta</button>
+    <button class="btn" onclick="trocarVideo('q76bMs-NwRk')">🌧️ Chuva</button>
+    <button class="btn" onclick="trocarVideo('jfKfPfyJRdk')">🎵 Lofi</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="small" id="reload-info"></div>
+</div>
+
+<script>
+const LAT = -23.55;
+const LON = -46.63;
+const RELOAD_HORAS = 6;
+
+const ESTACOES = [
+  { nome:'BBC World Service',        qualidade:'MP3 · News',
+    url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
+  { nome:'RADIO BOB Classic Rock',   qualidade:'MP3 192kbps',
+    url:'https://streams.radiobob.de/bob-classicrock/mp3-192/streams.radiobob.de/' },
+  { nome:'RADIO BOB Classic Rock',   qualidade:'MP3 128kbps',
+    url:'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
+  { nome:'RADIO BOB Classic Rock',   qualidade:'AAC 64kbps',
+    url:'https://streams.radiobob.de/bob-classicrock/aac-64/streams.radiobob.de/' },
+  { nome:'RADIO BOB National',       qualidade:'MP3 192kbps',
+    url:'https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/' },
+  { nome:'RADIO BOB National',       qualidade:'MP3 128kbps',
+    url:'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
+  { nome:'STAR FM Classic Rock',     qualidade:'MP3 192kbps',
+    url:'https://stream.starfm.de/classic/mp3-192/stream.starfm.de/' },
+  { nome:'STAR FM Classic Rock',     qualidade:'MP3 128kbps',
+    url:'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
+  { nome:'STAR FM Classic Rock',     qualidade:'AAC 64kbps',
+    url:'https://stream.starfm.de/classic/aac-64/stream.starfm.de/' },
+  { nome:'STAR FM Country Rock',     qualidade:'MP3 192kbps',
+    url:'https://stream.starfm.de/country/mp3-192/stream.starfm.de/' },
+  { nome:'STAR FM Country Rock',     qualidade:'MP3 128kbps',
+    url:'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
+  { nome:'Big R Radio 80s Metal',    qualidade:'MP3 128kbps',
+    url:'http://bigrradio.cdnstream1.com/5186_128' },
+  { nome:'Big R Radio 90s Alt Rock', qualidade:'MP3 128kbps',
+    url:'http://bigrradio.cdnstream1.com/5187_128' },
+];
+
+let estacaoAtual = 0, tocando = true;
+const radio = document.getElementById('radio');
+const sel = document.getElementById('select-estacao');
+
+ESTACOES.forEach((e,i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = `${e.nome} — ${e.qualidade}`;
+  sel.appendChild(opt);
+});
+
+function atualizarUIRadio() {
+  const e = ESTACOES[estacaoAtual];
+  document.getElementById('radio-nome').textContent = e.nome;
+  document.getElementById('radio-qualidade').textContent = e.qualidade;
+  document.getElementById('radio-indice').textContent =
+    `${estacaoAtual+1}/${ESTACOES.length}`;
+  sel.value = estacaoAtual;
+}
+
+function carregarEstacao(idx) {
+  estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
+  radio.src = ESTACOES[estacaoAtual].url;
+  radio.load();
+  if (tocando) radio.play().catch(()=>{});
+  atualizarUIRadio();
+  setStatus('amarelo','conectando...');
+}
+
+function proxima()  { carregarEstacao(estacaoAtual+1); }
+function anterior() { carregarEstacao(estacaoAtual-1); }
+function trocarPorSelect(idx) { carregarEstacao(parseInt(idx)); }
+
+function togglePlay() {
+  if (radio.paused) {
+    tocando = true;
+    radio.play().catch(()=>{});
+    document.getElementById('btn-play').textContent = '⏸ Pausar';
+    document.getElementById('btn-play').classList.remove('pausado');
+  } else {
+    tocando = false;
+    radio.pause();
+    document.getElementById('btn-play').textContent = '▶ Tocar';
+    document.getElementById('btn-play').classList.add('pausado');
+    setStatus('vermelho','pausado');
+  }
+}
+
+function setStatus(cor, txt) {
+  const cores = { verde:'#3fb950', amarelo:'#d29922', vermelho:'#f85149' };
+  document.getElementById('radio-dot').style.background = cores[cor];
+  document.getElementById('radio-status-txt').textContent = txt;
+}
+
+radio.addEventListener('playing', () => {
+  setStatus('verde','ao vivo ✓');
+  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  document.getElementById('btn-play').classList.remove('pausado');
+  tocando = true;
+});
+radio.addEventListener('error', () => {
+  setStatus('vermelho','erro — reconectando em 8s...');
+  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 8000);
+});
+radio.addEventListener('stalled', () => {
+  setStatus('amarelo','buffering...');
+  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 5000);
+});
+setInterval(()=>{
+  if (tocando && (radio.paused || radio.readyState===0)) {
+    setStatus('amarelo','watchdog — reiniciando...');
+    carregarEstacao(estacaoAtual);
+  }
+}, 30000);
+
+carregarEstacao(0);
+
+function trocarVideo(id) {
+  document.getElementById('yt-frame').src =
+    `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&rel=0`;
+}
+
+function atualizarHora() {
+  const agora = new Date();
+  document.getElementById('hora').textContent =
+    agora.toLocaleTimeString('pt-BR');
+  document.getElementById('data').textContent =
+    agora.toLocaleDateString('pt-BR',
+      {weekday:'short',day:'2-digit',month:'short'});
+}
+setInterval(atualizarHora, 1000);
+atualizarHora();
+
+const startTime = Date.now();
+setInterval(()=>{
+  const d = Math.floor((Date.now()-startTime)/1000);
+  const h = Math.floor(d/3600);
+  const m = Math.floor((d%3600)/60);
+  const s = d%60;
+  document.getElementById('uptime-label').textContent = `${h}h ${m}m ${s}s`;
+},1000);
+
+const proxReload = new Date(Date.now() + RELOAD_HORAS*3600000);
+document.getElementById('reload-info').textContent =
+  `Próximo reload: ${proxReload.toLocaleTimeString('pt-BR')}`;
+
+function buscarIP() {
+  fetch('https://ipapi.co/json/')
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('ip').textContent = d.ip||'erro';
+      document.getElementById('ip-pais').textContent =
+        `${d.city||''}, ${d.country_name||''}`;
+    })
+    .catch(()=>{ document.getElementById('ip').textContent='offline'; });
+}
+buscarIP();
+setInterval(buscarIP, 600000);
+
+function buscarClima() {
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,precipitation_probability,temperature_2m&forecast_days=1&timezone=auto`)
+    .then(r=>r.json())
+    .then(d=>{
+      const w = d.current_weather;
+      document.getElementById('temp').textContent = `${w.temperature}°C`;
+      document.getElementById('clima-desc').textContent = interpretarClima(w.weathercode);
+      document.getElementById('clima-vento').textContent = `💨 Vento: ${w.windspeed} km/h`;
+      const horaAtual = new Date().getHours();
+      if (d.hourly) {
+        const umidade = d.hourly.relativehumidity_2m?.[horaAtual];
+        const chuva   = d.hourly.precipitation_probability?.[horaAtual];
+        if (umidade != null)
+          document.getElementById('clima-umidade').textContent = `💧 Umidade: ${umidade}%`;
+        if (chuva != null)
+          document.getElementById('clima-chuva').textContent = `🌂 Chuva: ${chuva}%`;
+        let horasHtml = '';
+        for (let i = 0; i < 4; i++) {
+          const idx = horaAtual + i;
+          const temp = d.hourly.temperature_2m?.[idx] ?? '--';
+          horasHtml += `<span style="margin-right:12px">+${i}h: ${temp}°C</span>`;
+        }
+        document.getElementById('clima-horas').innerHTML = horasHtml;
+      }
+    })
+    .catch(()=>{ document.getElementById('clima-desc').textContent='sem dados'; });
+}
+function interpretarClima(c) {
+  const m = {
+    0:'☀️ Céu limpo',1:'🌤️ Poucas nuvens',2:'⛅ Parcialmente nublado',
+    3:'☁️ Nublado',45:'🌫️ Névoa',48:'🌫️ Névoa',51:'🌦️ Garoa leve',
+    53:'🌦️ Garoa',61:'🌧️ Chuva leve',63:'🌧️ Chuva',65:'🌧️ Chuva forte',
+    80:'🌦️ Pancadas',95:'⛈️ Tempestade',99:'⛈️ Tempestade'
+  };
+  return m[c]||`Cód ${c}`;
+}
+buscarClima();
+setInterval(buscarClima, 900000);
+
+function buscarCripto() {
+  const ids = 'bitcoin,ethereum,tether,solana,litecoin,binancecoin';
+  fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
+    .then(r=>r.json())
+    .then(d=>{
+      const moedas = [
+        {id:'bitcoin',nome:'BTC'},{id:'ethereum',nome:'ETH'},
+        {id:'tether',nome:'USDT'},{id:'solana',nome:'SOL'},
+        {id:'litecoin',nome:'LTC'},{id:'binancecoin',nome:'BNB'},
+      ];
+      let html = '';
+      moedas.forEach(m=>{
+        const info = d[m.id]; if(!info) return;
+        const preco = info.usd.toLocaleString('en-US',{style:'currency',currency:'USD'});
+        const ch = (info.usd_24h_change||0).toFixed(2);
+        const cor = parseFloat(ch)>=0?'green':'red';
+        const sinal = parseFloat(ch)>=0?'+':'';
+        html+=`<div class="crypto-row">
+          <span>${m.nome}</span><span>${preco}</span>
+          <span class="${cor}">${sinal}${ch}%</span></div>`;
+      });
+      document.getElementById('crypto-container').innerHTML = html;
+    })
+    .catch(()=>{
+      document.getElementById('crypto-container').innerHTML=
+        '<div class="small red">API indisponível</div>';
+    });
+}
+buscarCripto();
+setInterval(buscarCripto, 300000);
+
+function buscarNoticias() {
+  const rss = encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
+  fetch(`https://api.allorigins.win/get?url=${rss}`)
+    .then(r=>r.json())
+    .then(d=>{
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(d.contents,'text/xml');
+      const items = xml.querySelectorAll('item');
+      let html = '', count = 0;
+      items.forEach(item=>{
+        if(count>=7) return;
+        const titulo = item.querySelector('title')?.textContent||'';
+        html+=`<div class="news-item"><span class="yellow">▸</span> ${titulo}</div>`;
+        count++;
+      });
+      document.getElementById('news-container').innerHTML =
+        html||'<div class="small">sem notícias</div>';
+    })
+    .catch(()=>{
+      document.getElementById('news-container').innerHTML=
+        '<div class="small red">sem conexão</div>';
+    });
+}
+buscarNoticias();
+setInterval(buscarNoticias, 600000);
+</script>
+</body>
+</html>
