@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="21600">
+<link rel="manifest" href="/nodes/manifest.json">
 <title>XT1033 Node</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -143,10 +144,8 @@
   <div class="radio-nome" id="radio-nome">---</div>
   <div class="radio-qualidade" id="radio-qualidade"></div>
 
-  <!-- Select de estações -->
   <select class="select-estacao" id="select-estacao" onchange="trocarPorSelect(this.value)"></select>
 
-  <!-- Controles -->
   <div class="radio-controles">
     <button class="btn" onclick="anterior()">⏮ Ant</button>
     <button class="btn btn-play" id="btn-play" onclick="togglePlay()">⏸ Pausar</button>
@@ -189,9 +188,9 @@ const LAT = -23.55;
 const LON = -46.63;
 const RELOAD_HORAS = 6;
 
-// LISTA DE ESTAÇÕES
+// LISTA DE ESTAÇÕES — índice 0 = BBC, índice 2 = BOB Rock 128kbps (padrão)
 const ESTACOES = [
-  // BBC (padrão original)
+  // BBC
   { nome: 'BBC World Service',       qualidade: 'MP3 · News',
     url: 'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
 
@@ -220,20 +219,16 @@ const ESTACOES = [
     url: 'https://pureplay.cdnstream1.com/6012_64.aac/playlist.m3u8' },
   { nome: 'Choice Classic Rock',     qualidade: 'MP3 · Stream',
     url: 'http://streamer.radio.co/s66f2626b4/listen.m3u' },
-
-  // Metal / Hard Rock
   { nome: 'Big R Radio 80s Metal',   qualidade: 'MP3 128kbps',
     url: 'http://bigrradio.cdnstream1.com/5186_128' },
   { nome: 'Big R Radio 90s Alt Rock',qualidade: 'MP3 128kbps',
     url: 'http://bigrradio.cdnstream1.com/5187_128' },
 ];
-// ─────────────────────────────────────────────────────────
 
-// Estado do rádio
+// ─── RÁDIO — inicia na estação 2 (BOB Rock 128kbps) ──────
 let estacaoAtual = 0;
 let tocando = true;
 
-// Popular select
 const sel = document.getElementById('select-estacao');
 ESTACOES.forEach((e, i) => {
   const opt = document.createElement('option');
@@ -242,7 +237,6 @@ ESTACOES.forEach((e, i) => {
   sel.appendChild(opt);
 });
 
-// Atualizar UI da estação
 function atualizarUI() {
   const e = ESTACOES[estacaoAtual];
   document.getElementById('radio-nome').textContent = e.nome;
@@ -252,7 +246,6 @@ function atualizarUI() {
   sel.value = estacaoAtual;
 }
 
-// Carregar e tocar estação
 const radio = document.getElementById('radio');
 function carregarEstacao(idx) {
   estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
@@ -289,7 +282,6 @@ function setStatus(cor, txt) {
   document.getElementById('radio-status-txt').textContent = txt;
 }
 
-// Eventos do audio
 radio.addEventListener('playing', () => {
   setStatus('verde', 'ao vivo ✓');
   document.getElementById('btn-play').textContent = '⏸ Pausar';
@@ -304,8 +296,6 @@ radio.addEventListener('stalled', () => {
   setStatus('amarelo', 'buffering...');
   setTimeout(() => { if (tocando) carregarEstacao(estacaoAtual); }, 5000);
 });
-
-// Watchdog a cada 30s
 setInterval(() => {
   if (tocando && (radio.paused || radio.readyState === 0)) {
     setStatus('amarelo', 'watchdog — reiniciando...');
@@ -313,8 +303,8 @@ setInterval(() => {
   }
 }, 30000);
 
-// Iniciar BBC por padrão
-carregarEstacao(0);
+// Iniciar na RADIO BOB Classic Rock 128kbps (índice 2)
+carregarEstacao(2);
 
 // ─── HORA ────────────────────────────────────────────────
 function atualizarHora() {
@@ -414,17 +404,24 @@ function buscarCripto() {
 buscarCripto();
 setInterval(buscarCripto, 300000);
 
-// ─── NOTÍCIAS ─────────────────────────────────────────────
+// ─── NOTÍCIAS — via allorigins (sem limite de API key) ───
 function buscarNoticias() {
   const rss = 'https://feeds.bbci.co.uk/news/world/rss.xml';
-  fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=5`)
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rss)}`;
+  fetch(proxy)
     .then(r => r.json())
     .then(d => {
-      if (!d.items) return;
-      document.getElementById('news-container').innerHTML =
-        d.items.map(i =>
-          `<div class="news-item"><span class="yellow">▸</span> ${i.title}</div>`
-        ).join('');
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(d.contents, 'text/xml');
+      const items = xml.querySelectorAll('item');
+      if (!items.length) throw new Error('sem itens');
+      let html = '';
+      items.forEach((item, i) => {
+        if (i >= 5) return;
+        const titulo = item.querySelector('title')?.textContent || '';
+        html += `<div class="news-item"><span class="yellow">▸</span> ${titulo}</div>`;
+      });
+      document.getElementById('news-container').innerHTML = html || '<div class="small">sem notícias</div>';
     })
     .catch(() => {
       document.getElementById('news-container').innerHTML =
