@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="21600"><link rel="manifest" href="/nodes/manifest.json">
+<meta http-equiv="refresh" content="21600">
+<link rel="manifest" href="/nodes/manifest.json">
 <title>T395 Node</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -34,7 +35,6 @@
   .yellow { color:#d29922; }
   .red { color:#f85149; }
 
-  /* GRID PRINCIPAL — 2 colunas */
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
   .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 
@@ -120,7 +120,7 @@
     border:0;
   }
 
-  /* CLIMA ICONES */
+  /* CLIMA */
   .clima-temp { font-size:32px; font-weight:bold; color:#e6edf3; }
   .clima-info { font-size:12px; color:#8b949e; margin-top:4px; }
 
@@ -130,6 +130,29 @@
     grid-template-columns:1fr 1fr 1fr;
     gap:8px;
     margin-bottom:8px;
+  }
+
+  /* BOTÕES VÍDEO */
+  .video-btns {
+    margin-top:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .btn-vid {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:11px;
+  }
+  .btn-vid:active { background:#30363d; }
+  .btn-vid.ativo {
+    border-color:#58a6ff;
+    color:#58a6ff;
   }
 </style>
 </head>
@@ -214,21 +237,21 @@
 
 <!-- LINHA 3: VIDEO -->
 <div class="card">
-  <div class="card-title">🎬 Vídeo Ambiente</div>
+  <div class="card-title">🎬 Vídeo Ambiente — <span id="vid-label" style="color:#8b949e;font-weight:normal">Lareira</span></div>
   <div class="video-wrapper">
     <iframe
       id="yt-frame"
-      src="https://www.youtube.com/embed/videoseries?list=PLuGpMBjpKFMBRBJ0SRQF5MlKJQBOqYoGG&autoplay=1&mute=1&loop=1&controls=0&rel=0"
+      src="about:blank"
       allow="autoplay; encrypted-media"
       allowfullscreen>
     </iframe>
   </div>
-  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="btn" onclick="trocarVideo('PLuGpMBjpKFMBRBJ0SRQF5MlKJQBOqYoGG')">🌿 Natureza</button>
-    <button class="btn" onclick="trocarVideo('PLuGpMBjpKFMCCHTAOv-Cb0-MOBBCy_Hn0')">🌊 Oceano</button>
-    <button class="btn" onclick="trocarVideo('PLuGpMBjpKFMAiPXWGMkfI0P7pBMBGMD7f')">🌃 Cidade</button>
-    <button class="btn" onclick="trocarVideo('PLuGpMBjpKFMBNNanIGNaBiBJdMcAhFZOQ')">🔥 Lareira</button>
-    <button class="btn" onclick="trocarVideo('PLuGpMBjpKFMC7hHFBMbvSf-9R7_cDJVW4')">🌧️ Chuva</button>
+  <div class="video-btns">
+    <button class="btn-vid ativo" id="btn-lareira"  onclick="trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira')">🔥 Lareira</button>
+    <button class="btn-vid"       id="btn-floresta" onclick="trocarVideo('eNUpTV9BGac','Floresta','btn-floresta')">🌿 Floresta</button>
+    <button class="btn-vid"       id="btn-oceano"   onclick="trocarVideo('9AnAI85c608','Oceano','btn-oceano')">🌊 Oceano</button>
+    <button class="btn-vid"       id="btn-lofi"     onclick="trocarVideo('jfKfPfyJRdk','Lofi','btn-lofi')">🎵 Lofi</button>
+    <button class="btn-vid"       id="btn-chuva"    onclick="trocarVideo('mai1cI_suG8','Chuva','btn-chuva')">🌧️ Chuva</button>
   </div>
 </div>
 
@@ -238,7 +261,7 @@ const LAT = -23.55;
 const LON = -46.63;
 const RELOAD_HORAS = 6;
 
-// ESTAÇÕES DE RÁDIO
+// ESTAÇÕES — índice 2 = BOB Rock 128kbps (padrão)
 const ESTACOES = [
   { nome:'BBC World Service',        qualidade:'MP3 · News',
     url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
@@ -271,7 +294,6 @@ const ESTACOES = [
   { nome:'Big R Radio 90s Alt Rock', qualidade:'MP3 128kbps',
     url:'http://bigrradio.cdnstream1.com/5187_128' },
 ];
-// ─────────────────────────────────────────────────────────
 
 // ── RÁDIO ────────────────────────────────────────────────
 let estacaoAtual = 0;
@@ -350,13 +372,38 @@ setInterval(()=>{
   }
 }, 30000);
 
-carregarEstacao(0);
+// Iniciar na RADIO BOB Classic Rock 128kbps (índice 2)
+carregarEstacao(2);
 
 // ── VÍDEO ────────────────────────────────────────────────
-function trocarVideo(playlistId) {
+// IDs de vídeo direto (não playlist) — embed funciona sem restrição
+// 🔥 Lareira:  ZOAExL-xIDM  (4K Fireplace crackling 10h)
+// 🌿 Floresta: eNUpTV9BGac  (Forest In 4K — Scenic Relaxation)
+// 🌊 Oceano:   9AnAI85c608  (Calming Sea 8h 4K ASMR)
+// 🎵 Lofi:     jfKfPfyJRdk  (Lofi Girl — beats to relax/study)
+// 🌧️ Chuva:    mai1cI_suG8  (Over The Garden Wall — Chilltoons Rain)
+
+let btnAtivo = 'btn-lareira';
+
+function trocarVideo(videoId, label, btnId) {
+  // Desativar botão anterior
+  const prev = document.getElementById(btnAtivo);
+  if (prev) prev.classList.remove('ativo');
+  // Ativar botão atual
+  const curr = document.getElementById(btnId);
+  if (curr) curr.classList.add('ativo');
+  btnAtivo = btnId;
+  // Atualizar label
+  document.getElementById('vid-label').textContent = label;
+  // Trocar iframe — youtube-nocookie evita cookies e tem menos restrições de embed
   document.getElementById('yt-frame').src =
-    `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=1&mute=1&loop=1&controls=0&rel=0`;
+    `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&rel=0&modestbranding=1`;
 }
+
+// Carregar lareira ao iniciar (após 1s para a página estabilizar)
+setTimeout(() => {
+  trocarVideo('ZOAExL-xIDM', 'Lareira', 'btn-lareira');
+}, 1000);
 
 // ── HORA ─────────────────────────────────────────────────
 function atualizarHora() {
@@ -404,7 +451,7 @@ function buscarClima() {
   const url = `https://api.open-meteo.com/v1/forecast`+
     `?latitude=${LAT}&longitude=${LON}`+
     `&current_weather=true`+
-    `&hourly=relativehumidity_2m,precipitation_probability`+
+    `&hourly=relativehumidity_2m,precipitation_probability,temperature_2m`+
     `&forecast_days=1&timezone=auto`;
   fetch(url)
     .then(r=>r.json())
@@ -416,7 +463,6 @@ function buscarClima() {
       document.getElementById('clima-vento').textContent =
         `💨 Vento: ${w.windspeed} km/h`;
 
-      // Umidade e chuva da hora atual
       const horaAtual = new Date().getHours();
       if (d.hourly) {
         const umidade = d.hourly.relativehumidity_2m?.[horaAtual];
@@ -428,13 +474,11 @@ function buscarClima() {
           document.getElementById('clima-chuva').textContent =
             `🌂 Chuva: ${chuva}%`;
 
-        // Próximas 4 horas
         let horasHtml = '';
         for (let i = 0; i < 4; i++) {
           const idx = horaAtual + i;
           const temp = d.hourly.temperature_2m?.[idx] ?? '--';
-          horasHtml += `<span style="margin-right:12px">
-            +${i}h: ${temp}°C</span>`;
+          horasHtml += `<span style="margin-right:12px">+${i}h: ${temp}°C</span>`;
         }
         document.getElementById('clima-horas').innerHTML = horasHtml;
       }
@@ -489,19 +533,25 @@ function buscarCripto() {
 buscarCripto();
 setInterval(buscarCripto, 300000);
 
-// ── NOTÍCIAS ─────────────────────────────────────────────
+// ── NOTÍCIAS — via allorigins (sem limite de API key) ────
 function buscarNoticias() {
   const rss = 'https://feeds.bbci.co.uk/news/world/rss.xml';
-  fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=7`)
+  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rss)}`;
+  fetch(proxy)
     .then(r=>r.json())
     .then(d=>{
-      if(!d.items) return;
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(d.contents, 'text/xml');
+      const items = xml.querySelectorAll('item');
+      if (!items.length) throw new Error('sem itens');
+      let html = '';
+      items.forEach((item, i) => {
+        if (i >= 7) return;
+        const titulo = item.querySelector('title')?.textContent || '';
+        html += `<div class="news-item"><span class="yellow">▸</span> ${titulo}</div>`;
+      });
       document.getElementById('news-container').innerHTML =
-        d.items.map(i=>
-          `<div class="news-item">
-            <span class="yellow">▸</span> ${i.title}
-          </div>`
-        ).join('');
+        html || '<div class="small">sem notícias</div>';
     })
     .catch(()=>{
       document.getElementById('news-container').innerHTML=
