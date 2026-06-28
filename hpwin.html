@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="21600">
+<link rel="manifest" href="/nodes/manifest.json">
 <title>HPWIN Node</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -128,9 +129,21 @@
     font-weight:bold;
     margin-right:4px;
   }
-  .badge-green { background:#1a3a1a; color:#3fb950; border:1px solid #3fb950; }
-  .badge-blue  { background:#0d2137; color:#58a6ff; border:1px solid #58a6ff; }
-  .badge-yellow{ background:#2d2000; color:#d29922; border:1px solid #d29922; }
+  .badge-green  { background:#1a3a1a; color:#3fb950; border:1px solid #3fb950; }
+  .badge-blue   { background:#0d2137; color:#58a6ff; border:1px solid #58a6ff; }
+  .badge-yellow { background:#2d2000; color:#d29922; border:1px solid #d29922; }
+  .btn-vid {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:11px;
+  }
+  .btn-vid:active { background:#30363d; }
+  .btn-vid.ativo { border-color:#58a6ff; color:#58a6ff; }
 </style>
 </head>
 <body>
@@ -194,28 +207,17 @@
         <span class="badge badge-green">● ONLINE</span>
       </div>
       <div class="small" style="margin-bottom:4px">Apps ativos:</div>
-      <div>
-        <span class="badge badge-blue">Honeygain</span>
-      </div><br>
-      <div>
-        <span class="badge badge-blue">EarnApp</span>
-      </div><br>
-      <div>
-        <span class="badge badge-blue">Tailscale</span>
-      </div><br>
-      <div>
-        <span class="badge badge-yellow">TradingView</span>
-      </div><br>
-      <div>
-        <span class="badge badge-blue">OpenSSH</span>
-      </div>
+      <div><span class="badge badge-blue">Honeygain</span></div><br>
+      <div><span class="badge badge-blue">EarnApp</span></div><br>
+      <div><span class="badge badge-blue">Tailscale</span></div><br>
+      <div><span class="badge badge-yellow">TradingView</span></div><br>
+      <div><span class="badge badge-blue">OpenSSH</span></div>
     </div>
   </div>
 </div>
 
 <!-- RADIO + CLIMA -->
 <div class="grid2">
-
   <div class="card">
     <div class="card-title">
       📻 Rádio
@@ -248,7 +250,6 @@
     <div class="card-title">📅 Próximas horas</div>
     <div id="clima-horas" class="small"></div>
   </div>
-
 </div>
 
 <!-- CRIPTO + NOTICIAS -->
@@ -265,20 +266,27 @@
 
 <!-- VIDEO -->
 <div class="card">
-  <div class="card-title">🎬 Vídeo</div>
+  <div class="card-title">🎬 Vídeo Ambiente — <span id="vid-label" style="color:#8b949e;font-weight:normal">Lareira</span></div>
   <div class="video-wrapper">
-    <iframe id="yt-frame"
-      src="https://www.youtube.com/embed/DWcJFNfaw9c?autoplay=1&mute=1&loop=1&playlist=DWcJFNfaw9c&controls=0&rel=0"
+    <iframe id="yt-frame" src="about:blank"
       allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
   <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="btn" onclick="trocarVideo('DWcJFNfaw9c')">📺 Cartoons 80s/90s</button>
-    <button class="btn" onclick="trocarVideo('2XID_W4neJo')">🔥 Lareira</button>
-    <button class="btn" onclick="trocarVideo('xNN7iTA57jM')">🌊 Oceano</button>
-    <button class="btn" onclick="trocarVideo('rUxyKA_-grg')">🌿 Floresta</button>
-    <button class="btn" onclick="trocarVideo('q76bMs-NwRk')">🌧️ Chuva</button>
-    <button class="btn" onclick="trocarVideo('4NRXx6pbok c')">🌃 Cidade</button>
-    <button class="btn" onclick="trocarVideo('jfKfPfyJRdk')">🎵 Lofi</button>
+    <!-- IDs diretos de vídeo — youtube-nocookie sem restrição de embed -->
+    <!-- 🔥 ZOAExL-xIDM  Fireplace 4K 10h crackling                    -->
+    <!-- 📺 hIRiKgFGMe4  ABC Saturday Morning Cartoons 1988 full eps   -->
+    <!-- 🌊 9AnAI85c608  Calming Sea 8h 4K ASMR                        -->
+    <!-- 🌿 eNUpTV9BGac  Forest In 4K Scenic Relaxation                -->
+    <!-- 🌧️ xPHiHTmt2FU  Rain on City Street 8h 4K ASMR               -->
+    <!-- 🌃 0-hYl2cZB0E  Rainy Night City View 8h                      -->
+    <!-- 🎵 jfKfPfyJRdk  Lofi Girl beats to relax/study                -->
+    <button class="btn-vid ativo"  id="btn-lareira"  onclick="trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira')">🔥 Lareira</button>
+    <button class="btn-vid"        id="btn-cartoons" onclick="trocarVideo('hIRiKgFGMe4','Cartoons 80s','btn-cartoons')">📺 Cartoons</button>
+    <button class="btn-vid"        id="btn-oceano"   onclick="trocarVideo('9AnAI85c608','Oceano','btn-oceano')">🌊 Oceano</button>
+    <button class="btn-vid"        id="btn-floresta" onclick="trocarVideo('eNUpTV9BGac','Floresta','btn-floresta')">🌿 Floresta</button>
+    <button class="btn-vid"        id="btn-chuva"    onclick="trocarVideo('xPHiHTmt2FU','Chuva','btn-chuva')">🌧️ Chuva</button>
+    <button class="btn-vid"        id="btn-cidade"   onclick="trocarVideo('0-hYl2cZB0E','Cidade','btn-cidade')">🌃 Cidade</button>
+    <button class="btn-vid"        id="btn-lofi"     onclick="trocarVideo('jfKfPfyJRdk','Lofi','btn-lofi')">🎵 Lofi</button>
   </div>
 </div>
 
@@ -398,13 +406,25 @@ setInterval(()=>{
   }
 }, 30000);
 
-carregarEstacao(0);
+carregarEstacao(2); // RADIO BOB Classic Rock 128kbps
 
 // ── VÍDEO ────────────────────────────────────────────────
-function trocarVideo(id) {
+let btnAtivo = 'btn-lareira';
+
+function trocarVideo(videoId, label, btnId) {
+  const prev = document.getElementById(btnAtivo);
+  if (prev) prev.classList.remove('ativo');
+  const curr = document.getElementById(btnId);
+  if (curr) curr.classList.add('ativo');
+  btnAtivo = btnId;
+  document.getElementById('vid-label').textContent = label;
+  // youtube-nocookie: menos bloqueios de embed, sem cookies
   document.getElementById('yt-frame').src =
-    `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&rel=0`;
+    `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&rel=0&modestbranding=1`;
 }
+
+// Carregar lareira ao iniciar
+setTimeout(() => trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira'), 1000);
 
 // ── HORA ─────────────────────────────────────────────────
 function atualizarHora() {
@@ -425,8 +445,7 @@ setInterval(()=>{
   const h = Math.floor(d/3600);
   const m = Math.floor((d%3600)/60);
   const s = d%60;
-  document.getElementById('uptime-label').textContent =
-    `${h}h ${m}m ${s}s`;
+  document.getElementById('uptime-label').textContent = `${h}h ${m}m ${s}s`;
 },1000);
 
 const proxReload = new Date(Date.now() + RELOAD_HORAS*3600000);
@@ -473,9 +492,7 @@ function buscarClima() {
         document.getElementById('clima-horas').innerHTML = horasHtml;
       }
     })
-    .catch(()=>{
-      document.getElementById('clima-desc').textContent='sem dados';
-    });
+    .catch(()=>{ document.getElementById('clima-desc').textContent='sem dados'; });
 }
 function interpretarClima(c) {
   const m = {
@@ -521,7 +538,7 @@ function buscarCripto() {
 buscarCripto();
 setInterval(buscarCripto, 300000);
 
-// ── NOTÍCIAS ─────────────────────────────────────────────
+// ── NOTÍCIAS — allorigins + DOMParser ────────────────────
 function buscarNoticias() {
   const rss = encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
   fetch(`https://api.allorigins.win/get?url=${rss}`)
