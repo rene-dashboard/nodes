@@ -1,155 +1,55 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="300"><link rel="manifest" href="/nodes/manifest.json">
+<meta http-equiv="refresh" content="300">
+<link rel="manifest" href="/nodes/manifest.json">
 <title>Nodes Dashboard</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background:#0d1117;
-    color:#c9d1d9;
-    font-family:monospace;
-    font-size:14px;
-    padding:8px;
-  }
-  .card {
-    background:#161b22;
-    border:1px solid #30363d;
-    border-radius:6px;
-    padding:10px;
-    margin-bottom:8px;
-  }
-  .card-title {
-    color:#58a6ff;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin-bottom:8px;
-  }
+  body { background:#0d1117; color:#c9d1d9; font-family:monospace; font-size:14px; padding:8px; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:10px; margin-bottom:8px; }
+  .card-title { color:#58a6ff; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
   .small { font-size:12px; color:#8b949e; }
-  .green { color:#3fb950; }
-  .yellow { color:#d29922; }
-  .red { color:#f85149; }
-  .blue { color:#58a6ff; }
-
-  /* HEADER */
-  .header {
-    background:#161b22;
-    border:1px solid #30363d;
-    border-radius:6px;
-    padding:12px;
-    margin-bottom:8px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .header-title {
-    font-size:16px;
-    font-weight:bold;
-    color:#e6edf3;
-  }
+  .green { color:#3fb950; } .yellow { color:#d29922; } .red { color:#f85149; } .blue { color:#58a6ff; }
+  .header { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .header-title { font-size:16px; font-weight:bold; color:#e6edf3; }
   .header-sub { font-size:11px; color:#8b949e; }
-
-  /* TOPBAR */
   .topbar { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
   .value { font-size:16px; color:#e6edf3; font-weight:bold; }
-
-  /* GRID NODES */
-  .nodes-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-    margin-bottom:8px;
-  }
-
-  /* NODE CARD */
-  .node-card {
-    background:#161b22;
-    border:1px solid #30363d;
-    border-radius:6px;
-    padding:10px;
-    text-decoration:none;
-    display:block;
-    transition:border-color 0.2s;
-  }
+  .nodes-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .node-card { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:10px; text-decoration:none; display:block; transition:border-color 0.2s; }
   .node-card:hover { border-color:#58a6ff; }
-  .node-card.offline { border-color:#f8514933; opacity:0.6; }
-  .node-name {
-    font-size:13px;
-    font-weight:bold;
-    color:#e6edf3;
-    margin-bottom:4px;
-  }
+  .node-card.no-link { cursor:default; }
+  .node-card.no-link:hover { border-color:#30363d; }
+  .node-card.admin-card { border-color:#2d2000; }
+  .node-card.admin-card:hover { border-color:#d29922; }
+  .node-name { font-size:13px; font-weight:bold; color:#e6edf3; margin-bottom:4px; }
   .node-hw { font-size:11px; color:#8b949e; margin-bottom:6px; }
   .node-badges { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
-  .badge {
-    display:inline-block;
-    padding:1px 5px;
-    border-radius:3px;
-    font-size:10px;
-    font-weight:bold;
-  }
+  .badge { display:inline-block; padding:1px 5px; border-radius:3px; font-size:10px; font-weight:bold; }
   .badge-green  { background:#1a3a1a; color:#3fb950; border:1px solid #3fb950; }
   .badge-blue   { background:#0d2137; color:#58a6ff; border:1px solid #58a6ff; }
   .badge-yellow { background:#2d2000; color:#d29922; border:1px solid #d29922; }
   .badge-red    { background:#2d0d0d; color:#f85149; border:1px solid #f85149; }
   .badge-gray   { background:#1c1c1c; color:#8b949e; border:1px solid #8b949e; }
+  .badge-purple { background:#1a0d2e; color:#bc8cff; border:1px solid #bc8cff; }
   .node-ip { font-size:10px; color:#8b949e; margin-top:4px; }
-  .node-status {
-    font-size:10px;
-    font-weight:bold;
-    float:right;
-  }
-  .status-dot {
-    display:inline-block;
-    width:7px; height:7px;
-    border-radius:50%;
-    margin-right:3px;
-    animation:pulse 2s infinite;
-  }
+  .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:3px; animation:pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* CRIPTO */
-  .crypto-row {
-    display:flex;
-    justify-content:space-between;
-    padding:4px 0;
-    border-bottom:1px solid #21262d;
-    font-size:12px;
-  }
+  .crypto-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #21262d; font-size:12px; }
   .crypto-row:last-child { border-bottom:none; }
-
-  /* BACK LINK */
-  .back-link {
-    display:inline-block;
-    color:#58a6ff;
-    font-size:12px;
-    text-decoration:none;
-    margin-bottom:8px;
-  }
+  .back-link { display:inline-block; color:#58a6ff; font-size:12px; text-decoration:none; margin-bottom:8px; }
   .back-link:hover { text-decoration:underline; }
-
-  /* SEPARADOR */
-  .section-label {
-    font-size:10px;
-    color:#8b949e;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin:4px 0 6px;
-    padding-left:2px;
-  }
+  .section-label { font-size:10px; color:#8b949e; text-transform:uppercase; letter-spacing:1px; margin:4px 0 6px; padding-left:2px; }
 </style>
 </head>
 <body>
 
-<!-- BACK -->
 <a class="back-link" href="https://rene-dashboard.github.io/">← Página Principal</a>
 
-<!-- HEADER -->
 <div class="header">
   <div>
     <div class="header-title">📡 Nodes Dashboard</div>
@@ -161,7 +61,6 @@
   </div>
 </div>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="card">
     <div class="card-title">🌐 IP Público</div>
@@ -169,25 +68,24 @@
     <div class="small" id="ip-pais"></div>
   </div>
   <div class="card">
-    <div class="card-title">📱 Nodes</div>
-    <div class="value green">5</div>
+    <div class="card-title">📡 Nodes</div>
+    <div class="value green">7</div>
     <div class="small">operacionais</div>
   </div>
   <div class="card">
     <div class="card-title">💤 Offline</div>
-    <div class="value yellow">1</div>
-    <div class="small">win-celeron</div>
+    <div class="value green">0</div>
+    <div class="small">todos online</div>
   </div>
 </div>
 
-<!-- NODES ANDROID -->
+<!-- ANDROID NODES -->
 <div class="section-label">📱 Android Nodes</div>
 <div class="nodes-grid">
 
   <a class="node-card" href="xt1033.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      XT1033
+      <span class="status-dot" style="background:#3fb950"></span>XT1033
     </div>
     <div class="node-hw">SD400 · 1GB · Android 8.1</div>
     <div class="node-badges">
@@ -195,13 +93,12 @@
       <span class="badge badge-blue">Honeygain</span>
       <span class="badge badge-blue">Tailscale</span>
     </div>
-    <div class="node-ip">xt-1033 · LineageOS · Rooted</div>
+    <div class="node-ip">xt1033 · LineageOS · Rooted</div>
   </a>
 
   <a class="node-card" href="t395.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      T395
+      <span class="status-dot" style="background:#3fb950"></span>T395
     </div>
     <div class="node-hw">Exynos 7870 · 3GB · Android 9</div>
     <div class="node-badges">
@@ -215,8 +112,7 @@
 
   <a class="node-card" href="a02s.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      Galaxy A02s
+      <span class="status-dot" style="background:#3fb950"></span>Galaxy A02s
     </div>
     <div class="node-hw">SD450 · 3GB · Android 12</div>
     <div class="node-badges">
@@ -228,16 +124,29 @@
     <div class="node-ip">galaxy-a02s · 100.83.183.90</div>
   </a>
 
+  <!-- A50s — sem página própria, só Honeygain -->
+  <div class="node-card no-link">
+    <div class="node-name">
+      <span class="status-dot" style="background:#3fb950"></span>Galaxy A50s
+    </div>
+    <div class="node-hw">Exynos 9611 · 4GB · Android 11</div>
+    <div class="node-badges">
+      <span class="badge badge-green">● Online</span>
+      <span class="badge badge-blue">Honeygain</span>
+      <span class="badge badge-gray">Sem rede exclusiva</span>
+    </div>
+    <div class="node-ip">a50s · 100.106.231.86</div>
+  </div>
+
 </div>
 
-<!-- NODES WINDOWS -->
+<!-- WINDOWS NODES -->
 <div class="section-label">🖥️ Windows Nodes</div>
 <div class="nodes-grid">
 
   <a class="node-card" href="daninote.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      DANINOTE
+      <span class="status-dot" style="background:#3fb950"></span>DANINOTE
     </div>
     <div class="node-hw">N3700 · 4GB · Win10 Home</div>
     <div class="node-badges">
@@ -251,8 +160,7 @@
 
   <a class="node-card" href="i3win.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      I3WIN
+      <span class="status-dot" style="background:#3fb950"></span>I3WIN
     </div>
     <div class="node-hw">i3-530 · 6GB · Win10 LTSC</div>
     <div class="node-badges">
@@ -266,8 +174,7 @@
 
   <a class="node-card" href="hpwin.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#3fb950"></span>
-      HPWIN
+      <span class="status-dot" style="background:#3fb950"></span>HPWIN
     </div>
     <div class="node-hw">AMD E1-1500 · 4GB · Win10 LTSC</div>
     <div class="node-badges">
@@ -279,101 +186,82 @@
     <div class="node-ip">hpwin · 100.76.116.116</div>
   </a>
 
-  <a class="node-card offline" href="winceleron.html">
+  <a class="node-card" href="winceleron.html">
     <div class="node-name">
-      <span class="status-dot" style="background:#f85149"></span>
-      WIN-CELERON
+      <span class="status-dot" style="background:#3fb950"></span>WIN-CELERON
     </div>
-    <div class="node-hw">Celeron · Win10</div>
+    <div class="node-hw">Celeron 1007U · 4GB · Win10 LTSC</div>
     <div class="node-badges">
-      <span class="badge badge-red">● Offline</span>
-      <span class="badge badge-gray">Pendente</span>
+      <span class="badge badge-green">● Online</span>
+      <span class="badge badge-blue">Honeygain</span>
+      <span class="badge badge-blue">EarnApp</span>
+      <span class="badge badge-blue">Tailscale</span>
     </div>
-    <div class="node-ip">win-celeron · página em breve</div>
+    <div class="node-ip">win-celeron · 100.106.198.73</div>
   </a>
 
 </div>
 
-<!-- CRIPTO RESUMO -->
+<!-- ADMIN NODE -->
+<div class="section-label">🔧 Administração</div>
+<div class="nodes-grid">
+
+  <a class="node-card admin-card" href="motog34.html">
+    <div class="node-name">
+      <span class="status-dot" style="background:#d29922"></span>Moto G34
+    </div>
+    <div class="node-hw">SD695 · 8GB · Android 15</div>
+    <div class="node-badges">
+      <span class="badge badge-yellow">⚙ Admin</span>
+      <span class="badge badge-blue">SSH Monitor</span>
+      <span class="badge badge-blue">Tailscale</span>
+      <span class="badge badge-purple">Central</span>
+    </div>
+    <div class="node-ip">motog34 · monitoramento da rede</div>
+  </a>
+
+</div>
+
+<!-- CRIPTO -->
 <div class="card">
   <div class="card-title">💰 Cripto (USD)</div>
   <div id="crypto-container"><div class="small">carregando...</div></div>
 </div>
 
-<!-- RELOAD INFO -->
 <div class="card">
   <div class="small" id="reload-info"></div>
-  <div class="small" style="margin-top:4px">
-    Auto-refresh a cada 5 minutos
-  </div>
+  <div class="small" style="margin-top:4px">Auto-refresh a cada 5 minutos</div>
 </div>
 
 <script>
-// HORA
 function atualizarHora() {
-  const agora = new Date();
-  document.getElementById('hora').textContent =
-    agora.toLocaleTimeString('pt-BR');
-  document.getElementById('data').textContent =
-    agora.toLocaleDateString('pt-BR',
-      {weekday:'short',day:'2-digit',month:'short'});
+  const a = new Date();
+  document.getElementById('hora').textContent = a.toLocaleTimeString('pt-BR');
+  document.getElementById('data').textContent = a.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});
 }
-setInterval(atualizarHora, 1000);
-atualizarHora();
+setInterval(atualizarHora, 1000); atualizarHora();
 
-// IP
 function buscarIP() {
-  fetch('https://ipapi.co/json/')
-    .then(r=>r.json())
-    .then(d=>{
-      document.getElementById('ip').textContent = d.ip||'erro';
-      document.getElementById('ip-pais').textContent =
-        `${d.city||''}, ${d.country_name||''}`;
-    })
-    .catch(()=>{ document.getElementById('ip').textContent='offline'; });
+  fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>{
+    document.getElementById('ip').textContent = d.ip||'erro';
+    document.getElementById('ip-pais').textContent = `${d.city||''}, ${d.country_name||''}`;
+  }).catch(()=>{ document.getElementById('ip').textContent='offline'; });
 }
-buscarIP();
-setInterval(buscarIP, 600000);
+buscarIP(); setInterval(buscarIP, 600000);
 
-// CRIPTO
 function buscarCripto() {
-  const ids = 'bitcoin,ethereum,tether,solana,litecoin,binancecoin';
-  fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
-    .then(r=>r.json())
-    .then(d=>{
-      const moedas = [
-        {id:'bitcoin',nome:'BTC'},{id:'ethereum',nome:'ETH'},
-        {id:'tether',nome:'USDT'},{id:'solana',nome:'SOL'},
-        {id:'litecoin',nome:'LTC'},{id:'binancecoin',nome:'BNB'},
-      ];
-      let html = '';
-      moedas.forEach(m=>{
-        const info = d[m.id]; if(!info) return;
-        const preco = info.usd.toLocaleString('en-US',
-          {style:'currency',currency:'USD'});
-        const ch = (info.usd_24h_change||0).toFixed(2);
-        const cor = parseFloat(ch)>=0?'#3fb950':'#f85149';
-        const sinal = parseFloat(ch)>=0?'+':'';
-        html+=`<div class="crypto-row">
-          <span>${m.nome}</span>
-          <span>${preco}</span>
-          <span style="color:${cor}">${sinal}${ch}%</span>
-        </div>`;
-      });
-      document.getElementById('crypto-container').innerHTML = html;
-    })
-    .catch(()=>{
-      document.getElementById('crypto-container').innerHTML=
-        '<div class="small red">API indisponível</div>';
-    });
+  fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether,solana,litecoin,binancecoin&vs_currencies=usd&include_24hr_change=true')
+    .then(r=>r.json()).then(d=>{
+      const moedas=[{id:'bitcoin',nome:'BTC'},{id:'ethereum',nome:'ETH'},{id:'tether',nome:'USDT'},{id:'solana',nome:'SOL'},{id:'litecoin',nome:'LTC'},{id:'binancecoin',nome:'BNB'}];
+      let html='';
+      moedas.forEach(m=>{ const i=d[m.id]; if(!i) return; const p=i.usd.toLocaleString('en-US',{style:'currency',currency:'USD'}); const ch=(i.usd_24h_change||0).toFixed(2); const cor=parseFloat(ch)>=0?'#3fb950':'#f85149'; html+=`<div class="crypto-row"><span>${m.nome}</span><span>${p}</span><span style="color:${cor}">${parseFloat(ch)>=0?'+':''}${ch}%</span></div>`; });
+      document.getElementById('crypto-container').innerHTML=html;
+    }).catch(()=>{ document.getElementById('crypto-container').innerHTML='<div class="small red">API indisponível</div>'; });
 }
-buscarCripto();
-setInterval(buscarCripto, 300000);
+buscarCripto(); setInterval(buscarCripto, 300000);
 
-// RELOAD
-const proxReload = new Date(Date.now() + 300000);
 document.getElementById('reload-info').textContent =
-  `Próximo refresh: ${proxReload.toLocaleTimeString('pt-BR')}`;
+  `Próximo refresh: ${new Date(Date.now()+300000).toLocaleTimeString('pt-BR')}`;
 </script>
 </body>
 </html>
