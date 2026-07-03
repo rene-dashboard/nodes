@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -74,9 +75,8 @@
   <div class="grid2">
     <div>
       <div class="node-info-row"><span class="small blue">Hostname</span><span class="small">galaxy-a02s</span></div>
-      <div class="node-info-row"><span class="small blue">Tailscale</span><span class="small">galaxy-a02s.tailae532e.ts.net</span></div>
-      <div class="node-info-row"><span class="small blue">IPv4</span><span class="small">100.83.183.90</span></div>
-      <div class="node-info-row"><span class="small blue">SO</span><span class="small">Android 12 · Sem root</span></div>
+      <div class="node-info-row"><span class="small blue">VPN</span><span class="small green">● Ativo</span></div>
+      <div class="node-info-row"><span class="small blue">SO</span><span class="small">Android 12 · Rooteado (Magisk)</span></div>
       <div class="node-info-row"><span class="small blue">CPU</span><span class="small">Snapdragon 450</span></div>
       <div class="node-info-row"><span class="small blue">RAM</span><span class="small">3 GB</span></div>
       <div class="node-info-row"><span class="small blue">Armazenamento</span><span class="small">32 GB</span></div>
@@ -84,21 +84,14 @@
     <div>
       <div style="margin-bottom:6px">
         <span class="badge badge-green">● ONLINE</span>
-        <span class="badge badge-red">SEM ROOT</span>
+        <span class="badge badge-green">ROOT</span>
       </div>
       <div class="small" style="margin-bottom:4px">Apps ativos:</div>
       <span class="badge badge-blue">Honeygain</span>
       <span class="badge badge-blue">EarnApp</span>
-      <span class="badge badge-blue">Tailscale</span>
+      <span class="badge badge-blue">Pawns.app</span>
       <span class="badge badge-blue">OpenSSH</span>
       <span class="badge badge-blue">Termux</span>
-      <span class="badge badge-blue">mpv</span>
-      <div class="small" style="margin-top:6px;margin-bottom:4px">Scripts:</div>
-      <span class="badge badge-yellow">radio.sh</span>
-      <div class="alerta">
-        ⚠️ Android 12 encerra Termux/mpv eventualmente.<br>
-        ROM 64bit + root em avaliação.
-      </div>
     </div>
   </div>
 </div>
@@ -142,18 +135,17 @@
 </div>
 
 <div class="card">
-  <div class="card-title">🎬 Vídeo Ambiente — <span id="vid-label" style="color:#8b949e;font-weight:normal">Lareira</span></div>
+  <div class="card-title">🎬 Vídeo Ambiente — <span id="vid-label" style="color:#8b949e;font-weight:normal">Oceano</span></div>
   <div class="video-wrapper">
     <iframe id="yt-frame" src="about:blank" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
   <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="btn-vid ativo"  id="btn-lareira"  onclick="trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira')">🔥 Lareira</button>
-    <button class="btn-vid"        id="btn-cartoons" onclick="trocarVideo('hIRiKgFGMe4','Cartoons 80s','btn-cartoons')">📺 Cartoons</button>
-    <button class="btn-vid"        id="btn-oceano"   onclick="trocarVideo('9AnAI85c608','Oceano','btn-oceano')">🌊 Oceano</button>
+    <button class="btn-vid ativo"  id="btn-oceano"   onclick="trocarVideo('9AnAI85c608','Oceano','btn-oceano')">🌊 Oceano</button>
+    <button class="btn-vid"        id="btn-lareira"  onclick="trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira')">🔥 Lareira</button>
     <button class="btn-vid"        id="btn-floresta" onclick="trocarVideo('eNUpTV9BGac','Floresta','btn-floresta')">🌿 Floresta</button>
     <button class="btn-vid"        id="btn-chuva"    onclick="trocarVideo('xPHiHTmt2FU','Chuva','btn-chuva')">🌧️ Chuva</button>
     <button class="btn-vid"        id="btn-cidade"   onclick="trocarVideo('0-hYl2cZB0E','Cidade','btn-cidade')">🌃 Cidade</button>
-    <button class="btn-vid"        id="btn-lofi"     onclick="trocarVideo('jfKfPfyJRdk','Lofi','btn-lofi')">🎵 Lofi</button>
+    <button class="btn-vid"        id="btn-lofi"     onclick="trocarVideo('JD-kMIpDfnY','Lofi','btn-lofi')">🎵 Lofi</button>
   </div>
 </div>
 
@@ -215,7 +207,7 @@ radio.addEventListener('stalled',()=>{ setStatus('amarelo','buffering...'); setT
 setInterval(()=>{ if(tocando&&(radio.paused||radio.readyState===0)){ setStatus('amarelo','watchdog — reiniciando...'); carregarEstacao(estacaoAtual); } },30000);
 carregarEstacao(2); // BOB Rock 128kbps
 
-let btnAtivo='btn-lareira';
+let btnAtivo='btn-oceano';
 function trocarVideo(videoId,label,btnId) {
   const prev=document.getElementById(btnAtivo); if(prev) prev.classList.remove('ativo');
   const curr=document.getElementById(btnId); if(curr) curr.classList.add('ativo');
@@ -224,7 +216,7 @@ function trocarVideo(videoId,label,btnId) {
   document.getElementById('yt-frame').src=
     `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&rel=0&modestbranding=1`;
 }
-setTimeout(()=>trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira'),1000);
+setTimeout(()=>trocarVideo('9AnAI85c608','Oceano','btn-oceano'),1000);
 
 function atualizarHora() {
   const a=new Date();
