@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="21600">
+<link rel="manifest" href="/nodes/manifest.json">
+<title>Home — Nodes</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0d1117;
+    color:#c9d1d9;
+    font-family:monospace;
+    font-size:14px;
+    min-height:100vh;
+  }
+
+  /* MENU FIXO */
+  .menu {
+    position:fixed;
+    top:0; left:0; right:0;
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    align-items:center;
+    padding:0 8px;
+    height:42px;
+    z-index:999;
+    gap:4px;
+    overflow-x:auto;
+  }
+  .menu-title {
+    color:#58a6ff;
+    font-weight:bold;
+    font-size:13px;
+    margin-right:8px;
+    white-space:nowrap;
+  }
+  .menu a {
+    color:#c9d1d9;
+    text-decoration:none;
+    padding:5px 10px;
+    border-radius:4px;
+    font-size:12px;
+    white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .menu a:hover { border-color:#30363d; color:#58a6ff; }
+  .menu a.active {
+    background:#1f6feb22;
+    border-color:#1f6feb;
+    color:#58a6ff;
+  }
+  .menu-sep {
+    color:#30363d;
+    font-size:16px;
+    padding:0 2px;
+  }
+
+  /* NODES DROPDOWN */
+  .dropdown { position:relative; }
+  .dropdown-btn {
+    color:#c9d1d9;
+    text-decoration:none;
+    padding:5px 10px;
+    border-radius:4px;
+    font-size:12px;
+    white-space:nowrap;
+    border:1px solid transparent;
+    background:none;
+    cursor:pointer;
+    font-family:monospace;
+  }
+  .dropdown-btn:hover { border-color:#30363d; color:#58a6ff; }
+  .dropdown-menu {
+    display:none;
+    position:absolute;
+    top:38px; left:0;
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:6px;
+    min-width:160px;
+    z-index:1000;
+    overflow:hidden;
+  }
+  .dropdown-menu a {
+    display:block;
+    padding:8px 12px;
+    color:#c9d1d9;
+    text-decoration:none;
+    font-size:12px;
+    border-bottom:1px solid #21262d;
+  }
+  .dropdown-menu a:last-child { border-bottom:none; }
+  .dropdown-menu a:hover { background:#21262d; color:#58a6ff; }
+  .dropdown.open .dropdown-menu { display:block; }
+
+  /* CONTEÚDO */
+  .content { padding:50px 8px 8px; }
+
+  /* CARDS */
+  .card {
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:6px;
+    padding:10px;
+    margin-bottom:8px;
+  }
+  .card-title {
+    color:#58a6ff;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .small { font-size:12px; color:#8b949e; }
+  .green { color:#3fb950; }
+  .yellow { color:#d29922; }
+  .red { color:#f85149; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* CLIMA */
+  .clima-temp { font-size:36px; font-weight:bold; color:#e6edf3; }
+  .clima-info { font-size:12px; color:#8b949e; margin-top:4px; }
+  .hora-value { font-size:32px; font-weight:bold; color:#e6edf3; }
+
+  /* RADIO */
+  .radio-dot {
+    display:inline-block;
+    width:8px; height:8px;
+    border-radius:50%;
+    background:#3fb950;
+    margin-right:6px;
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .radio-nome { font-size:13px; color:#e6edf3; font-weight:bold; margin:6px 0 2px; }
+  .radio-qualidade { font-size:11px; color:#8b949e; margin-bottom:8px; }
+  .radio-controles { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .btn {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:6px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:12px;
+  }
+  .btn:active { background:#30363d; }
+  .btn-play {
+    background:#1f6feb;
+    border-color:#388bfd;
+    color:#fff;
+    font-weight:bold;
+  }
+  .btn-play.pausado {
+    background:#21262d;
+    border-color:#f85149;
+    color:#f85149;
+  }
+  .select-radio {
+    width:100%;
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:6px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  /* YOUTUBE */
+  .yt-input-row {
+    display:flex;
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .yt-input {
+    flex:1;
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:8px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:13px;
+  }
+  .yt-input:focus { outline:none; border-color:#58a6ff; }
+  .yt-load-btn {
+    padding:8px 14px;
+    background:#1f6feb;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:12px;
+    font-weight:bold;
+  }
+  .select-canal {
+    width:100%;
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:6px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:12px;
+    margin-bottom:8px;
+  }
+  .video-wrapper {
+    position:relative;
+    width:100%;
+    padding-bottom:56.25%;
+    height:0;
+    overflow:hidden;
+    border-radius:4px;
+  }
+  .video-wrapper iframe {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    border:0;
+  }
+
+  /* CRIPTO */
+  .crypto-row {
+    display:flex;
+    justify-content:space-between;
+    padding:4px 0;
+    border-bottom:1px solid #21262d;
+    font-size:13px;
+  }
+  .crypto-row:last-child { border-bottom:none; }
+
+  /* NOTICIAS */
+  .news-item {
+    border-bottom:1px solid #21262d;
+    padding:6px 0;
+    font-size:12px;
+    line-height:1.5;
+  }
+  .news-item:last-child { border-bottom:none; }
+  .news-item a {
+    color:#c9d1d9;
+    text-decoration:none;
+  }
+  .news-item a:hover { color:#58a6ff; }
+  .news-source {
+    font-size:10px;
+    color:#8b949e;
+    margin-bottom:2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- MENU FIXO -->
+<nav class="menu">
+  <span class="menu-title">📡</span>
+  <a href="home.html" class="active">Home</a>
+  <span class="menu-sep">|</span>
+
+  <div class="dropdown" id="dd-nodes">
+    <button class="dropdown-btn"
+            onclick="toggleDD('dd-nodes')">Nodes ▾</button>
+    <div class="dropdown-menu">
+      <a href="index.html">📡 Hub Central</a>
+      <a href="xt1033.html">📱 XT1033</a>
+      <a href="t395.html">📱 T395</a>
+      <a href="a02s.html">📱 A02S</a>
+      <a href="daninote.html">🖥️ DANINOTE</a>
+      <a href="i3win.html">🖥️ I3WIN</a>
+      <a href="hpwin.html">🖥️ HPWIN</a>
+      <a href="winceleron.html">🖥️ WIN-CELERON</a>
+    </div>
+  </div>
+
+  <span class="menu-sep">|</span>
+  <a href="index.html">Index</a>
+  <span class="menu-sep">|</span>
+  <a href="https://rene-dashboard.github.io/">⚡ Principal</a>
+</nav>
+
+<!-- CONTEÚDO -->
+<div class="content">
+
+  <!-- CLIMA + HORA -->
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">🌡️ Clima</div>
+      <div class="clima-temp" id="temp">--°C</div>
+      <div class="clima-info" id="clima-desc">carregando...</div>
+      <div class="clima-info" id="clima-vento"></div>
+      <div class="clima-info" id="clima-umidade"></div>
+      <div class="clima-info" id="clima-chuva"></div>
+      <br>
+      <div class="card-title">📅 Próximas horas</div>
+      <div id="clima-horas" class="small"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏰ Hora Local</div>
+      <div class="hora-value" id="hora">--:--:--</div>
+      <div class="small" id="data">---</div>
+      <br>
+      <div class="card-title">🌐 IP Público</div>
+      <div class="small" id="ip">carregando...</div>
+      <div class="small" id="ip-pais"></div>
+    </div>
+  </div>
+
+  <!-- RADIO -->
+  <div class="card">
+    <div class="card-title">
+      📻 Rádio
+      <span style="float:right;color:#8b949e;font-size:10px"
+            id="radio-indice"></span>
+    </div>
+    <div>
+      <span class="radio-dot" id="radio-dot"></span>
+      <span id="radio-status-txt">conectando...</span>
+    </div>
+    <div class="radio-nome" id="radio-nome">---</div>
+    <div class="radio-qualidade" id="radio-qualidade"></div>
+    <select class="select-radio" id="select-radio"
+            onchange="trocarPorSelect(this.value)"></select>
+    <div class="radio-controles">
+      <button class="btn" onclick="anterior()">⏮</button>
+      <button class="btn btn-play" id="btn-play"
+              onclick="togglePlay()">⏸ Pausar</button>
+      <button class="btn" onclick="proxima()">⏭</button>
+    </div>
+    <audio id="radio" preload="none"></audio>
+  </div>
+
+  <!-- YOUTUBE -->
+  <div class="card">
+    <div class="card-title">🎬 YouTube</div>
+
+    <!-- Input de ID -->
+    <div class="yt-input-row">
+      <input class="yt-input" id="yt-id-input"
+             placeholder="Cole o ID do vídeo ex: dQw4w9WgXcQ"
+             onkeydown="if(event.key==='Enter') carregarVideoId()">
+      <button class="yt-load-btn" onclick="carregarVideoId()">▶ Carregar</button>
+    </div>
+
+    <!-- Canais favoritos -->
+    <select class="select-canal" id="select-canal"
+            onchange="carregarCanal(this.value)">
+      <option value="">— Canais favoritos —</option>
+      <option value="@panicojovempan">📺 Pânico Jovem Pan</option>
+      <option value="@fernandoulrichcanal">📺 Fernando Ulrich</option>
+      <option value="@stormeroficial">📺 Stormer Oficial</option>
+      <option value="@linhagemgeektv">📺 Linhagem Geek TV</option>
+      <option value="@nucleodharma">📺 Núcleo Dharma</option>
+    </select>
+
+    <!-- Player -->
+    <div class="video-wrapper">
+      <iframe id="yt-frame"
+        src="https://www.youtube.com/embed/2XID_W4neJo?autoplay=1&mute=0&controls=1&rel=0"
+        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+    <div class="small" style="margin-top:6px">
+      💡 Canais abrem a página do canal no YouTube
+    </div>
+  </div>
+
+  <!-- CRIPTO + NOTICIAS -->
+  <div class="grid2">
+
+    <!-- CRIPTO -->
+    <div class="card">
+      <div class="card-title">💰 Cripto (USD)</div>
+      <div id="crypto-container">
+        <div class="small">carregando...</div>
+      </div>
+    </div>
+
+    <!-- NOTICIAS -->
+    <div class="card">
+      <div class="card-title">📰 Notícias</div>
+
+      <div style="margin-bottom:6px">
+        <select class="select-canal" id="select-news"
+                onchange="trocarFeedNoticias(this.value)"
+                style="margin-bottom:0">
+          <option value="bbc">🌍 BBC World</option>
+          <option value="tech">💻 BBC Tecnologia</option>
+          <option value="ciencia">🔬 BBC Ciência</option>
+        </select>
+      </div>
+
+      <div id="news-container">
+        <div class="small">carregando...</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- fim content -->
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const LAT = -23.55;
+const LON = -46.63;
+
+const ESTACOES = [
+  { nome:'Radio Paradise Rock',    qualidade:'MP3 128kbps',
+    url:'http://stream.radioparadise.com/rock-128' },
+  { nome:'RADIO BOB Classic Rock', qualidade:'MP3 128kbps',
+    url:'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
+  { nome:'RADIO BOB Classic Rock', qualidade:'AAC 64kbps',
+    url:'https://streams.radiobob.de/bob-classicrock/aac-64/streams.radiobob.de/' },
+  { nome:'RADIO BOB National',     qualidade:'MP3 128kbps',
+    url:'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
+  { nome:'STAR FM Classic Rock',   qualidade:'MP3 128kbps',
+    url:'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
+  { nome:'STAR FM Classic Rock',   qualidade:'AAC 64kbps',
+    url:'https://stream.starfm.de/classic/aac-64/stream.starfm.de/' },
+  { nome:'STAR FM Country Rock',   qualidade:'MP3 128kbps',
+    url:'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
+  { nome:'GotRadio Classic Rock',  qualidade:'AAC · HLS',
+    url:'https://pureplay.cdnstream1.com/6012_64.aac/playlist.m3u8' },
+  { nome:'Choice Classic Rock',    qualidade:'MP3 · Stream',
+    url:'http://streamer.radio.co/s66f2626b4/listen.m3u' },
+  { nome:'Big R 80s Metal',        qualidade:'MP3 128kbps',
+    url:'http://bigrradio.cdnstream1.com/5186_128' },
+  { nome:'Big R 90s Alt Rock',     qualidade:'MP3 128kbps',
+    url:'http://bigrradio.cdnstream1.com/5187_128' },
+];
+
+const FEEDS = {
+  bbc:     'https://feeds.bbci.co.uk/news/world/rss.xml',
+  tech:    'https://feeds.bbci.co.uk/news/technology/rss.xml',
+  ciencia: 'https://feeds.bbci.co.uk/news/science_and_environment/rss.xml',
+};
+// ─────────────────────────────────────────────────────────
+
+// ── MENU DROPDOWN ────────────────────────────────────────
+function toggleDD(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown.open')
+      .forEach(d => d.classList.remove('open'));
+  }
+});
+
+// ── RÁDIO ────────────────────────────────────────────────
+let estacaoAtual = 0, tocando = true;
+const radio = document.getElementById('radio');
+const sel = document.getElementById('select-radio');
+
+ESTACOES.forEach((e,i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = `${e.nome} — ${e.qualidade}`;
+  sel.appendChild(opt);
+});
+
+function atualizarUIRadio() {
+  const e = ESTACOES[estacaoAtual];
+  document.getElementById('radio-nome').textContent = e.nome;
+  document.getElementById('radio-qualidade').textContent = e.qualidade;
+  document.getElementById('radio-indice').textContent =
+    `${estacaoAtual+1}/${ESTACOES.length}`;
+  sel.value = estacaoAtual;
+}
+
+function carregarEstacao(idx) {
+  estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
+  radio.src = ESTACOES[estacaoAtual].url;
+  radio.load();
+  if (tocando) radio.play().catch(()=>{});
+  atualizarUIRadio();
+  setStatus('amarelo','conectando...');
+}
+
+function proxima()  { carregarEstacao(estacaoAtual+1); }
+function anterior() { carregarEstacao(estacaoAtual-1); }
+function trocarPorSelect(idx) { carregarEstacao(parseInt(idx)); }
+
+function togglePlay() {
+  if (radio.paused) {
+    tocando = true;
+    radio.play().catch(()=>{});
+    document.getElementById('btn-play').textContent = '⏸ Pausar';
+    document.getElementById('btn-play').classList.remove('pausado');
+  } else {
+    tocando = false;
+    radio.pause();
+    document.getElementById('btn-play').textContent = '▶ Tocar';
+    document.getElementById('btn-play').classList.add('pausado');
+    setStatus('vermelho','pausado');
+  }
+}
+
+function setStatus(cor, txt) {
+  const cores = { verde:'#3fb950', amarelo:'#d29922', vermelho:'#f85149' };
+  document.getElementById('radio-dot').style.background = cores[cor];
+  document.getElementById('radio-status-txt').textContent = txt;
+}
+
+radio.addEventListener('playing', () => {
+  setStatus('verde','ao vivo ✓');
+  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  document.getElementById('btn-play').classList.remove('pausado');
+  tocando = true;
+});
+radio.addEventListener('error', () => {
+  setStatus('vermelho','erro — reconectando em 8s...');
+  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 8000);
+});
+radio.addEventListener('stalled', () => {
+  setStatus('amarelo','buffering...');
+  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 5000);
+});
+setInterval(()=>{
+  if (tocando && (radio.paused || radio.readyState===0)) {
+    setStatus('amarelo','watchdog — reiniciando...');
+    carregarEstacao(estacaoAtual);
+  }
+}, 30000);
+
+carregarEstacao(0); // Radio Paradise como padrão
+
+// ── YOUTUBE ──────────────────────────────────────────────
+function carregarVideoId() {
+  const id = document.getElementById('yt-id-input').value.trim();
+  if (!id) return;
+  document.getElementById('yt-frame').src =
+    `https://www.youtube.com/embed/${id}?autoplay=1&con
