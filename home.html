@@ -16,7 +16,8 @@
     min-height:100vh;
   }
 
-  /* MENU FIXO — mesmo bloco deve ser colado em todas as páginas de node */
+  /* MENU FIXO — cole este bloco em toda página de node (ajustando os href relativos)
+     assim toda página ganha navegação e volta para a Home. */
   .menu {
     position:fixed;
     top:0; left:0; right:0;
@@ -25,45 +26,39 @@
     display:flex;
     align-items:center;
     padding:0 8px;
-    height:42px;
+    height:38px;
     z-index:999;
     gap:4px;
   }
-  .menu-title {
-    color:#58a6ff;
-    font-weight:bold;
-    font-size:13px;
-    margin-right:4px;
-    white-space:nowrap;
-  }
-  .menu a, .menu-home {
+  .menu a {
     color:#c9d1d9;
     text-decoration:none;
-    padding:5px 10px;
+    padding:5px 9px;
     border-radius:4px;
     font-size:12px;
     white-space:nowrap;
     border:1px solid transparent;
   }
-  .menu a:hover, .menu-home:hover { border-color:#30363d; color:#58a6ff; }
+  .menu a:hover { border-color:#30363d; color:#58a6ff; }
   .menu a.active {
     background:#1f6feb22;
     border-color:#1f6feb;
     color:#58a6ff;
   }
-  .menu-sep {
-    color:#30363d;
-    font-size:16px;
-    padding:0 2px;
+  .menu-hora {
+    margin-left:auto;
+    color:#58a6ff;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+    padding-right:4px;
   }
-  .menu-right { margin-left:auto; }
 
   /* NODES DROPDOWN */
   .dropdown { position:relative; }
   .dropdown-btn {
     color:#c9d1d9;
-    text-decoration:none;
-    padding:5px 10px;
+    padding:5px 9px;
     border-radius:4px;
     font-size:12px;
     white-space:nowrap;
@@ -76,7 +71,7 @@
   .dropdown-menu {
     display:none;
     position:absolute;
-    top:38px; left:0;
+    top:34px; left:0;
     background:#161b22;
     border:1px solid #30363d;
     border-radius:6px;
@@ -87,26 +82,86 @@
   .dropdown-menu a {
     display:block;
     padding:8px 12px;
-    color:#c9d1d9;
-    text-decoration:none;
-    font-size:12px;
     border-bottom:1px solid #21262d;
+    border-radius:0;
   }
   .dropdown-menu a:last-child { border-bottom:none; }
   .dropdown-menu a:hover { background:#21262d; color:#58a6ff; }
   .dropdown.open .dropdown-menu { display:block; }
 
   /* CONTEÚDO */
-  .content { padding:50px 8px 8px; }
+  .content { padding:46px 8px 8px; }
 
-  /* CARDS */
   .card {
     background:#161b22;
     border:1px solid #30363d;
     border-radius:6px;
-    padding:10px;
+    padding:8px 10px;
     margin-bottom:8px;
   }
+  .small { font-size:11px; color:#8b949e; }
+  .green { color:#3fb950; }
+  .red { color:#f85149; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* CLIMA — faixa única e estreita */
+  .clima-row {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    overflow-x:auto;
+    white-space:nowrap;
+    font-size:12px;
+  }
+  .clima-row .temp { font-size:18px; font-weight:bold; color:#e6edf3; }
+  .clima-row .sep { color:#30363d; }
+  .clima-row .prox { color:#8b949e; }
+  .clima-row .prox b { color:#c9d1d9; }
+
+  /* RADIO — faixa única */
+  .radio-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .radio-dot {
+    display:inline-block;
+    width:7px; height:7px;
+    border-radius:50%;
+    background:#8b949e;
+    flex-shrink:0;
+  }
+  .radio-dot.tocando { background:#3fb950; animation:pulse 2s infinite; }
+  .radio-dot.erro { background:#f85149; animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .radio-nome { font-size:12px; color:#e6edf3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
+  .radio-controles { display:flex; gap:5px; margin-left:auto; }
+  .btn {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px 10px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:12px;
+  }
+  .btn:active { background:#30363d; }
+  .btn-play { border-color:#3fb950; color:#3fb950; font-weight:bold; }
+  .btn-play.tocando { background:#1f6feb; border-color:#388bfd; color:#fff; }
+  .select-radio {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:4px 6px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:11px;
+    max-width:140px;
+  }
+
+  /* CRIPTO */
   .card-title {
     color:#58a6ff;
     font-size:11px;
@@ -114,135 +169,6 @@
     letter-spacing:1px;
     margin-bottom:8px;
   }
-  .small { font-size:12px; color:#8b949e; }
-  .green { color:#3fb950; }
-  .yellow { color:#d29922; }
-  .red { color:#f85149; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-
-  /* CLIMA */
-  .clima-temp { font-size:36px; font-weight:bold; color:#e6edf3; }
-  .clima-info { font-size:12px; color:#8b949e; margin-top:4px; }
-  .hora-value { font-size:32px; font-weight:bold; color:#e6edf3; }
-  .horas-row { display:flex; gap:10px; margin-top:6px; }
-  .hora-item { text-align:center; }
-  .hora-item .h { color:#8b949e; font-size:10px; }
-  .hora-item .t { color:#e6edf3; font-size:12px; font-weight:bold; }
-
-  /* RADIO */
-  .radio-dot {
-    display:inline-block;
-    width:8px; height:8px;
-    border-radius:50%;
-    background:#8b949e;
-    margin-right:6px;
-  }
-  .radio-dot.tocando { background:#3fb950; animation:pulse 2s infinite; }
-  .radio-dot.erro { background:#f85149; animation:pulse 1s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .radio-nome { font-size:13px; color:#e6edf3; font-weight:bold; margin:6px 0 2px; }
-  .radio-qualidade { font-size:11px; color:#8b949e; margin-bottom:8px; }
-  .radio-controles { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-  .btn {
-    background:#21262d;
-    border:1px solid #30363d;
-    color:#c9d1d9;
-    padding:6px 12px;
-    border-radius:4px;
-    cursor:pointer;
-    font-family:monospace;
-    font-size:12px;
-  }
-  .btn:active { background:#30363d; }
-  .btn-play {
-    background:#21262d;
-    border-color:#3fb950;
-    color:#3fb950;
-    font-weight:bold;
-  }
-  .btn-play.tocando {
-    background:#1f6feb;
-    border-color:#388bfd;
-    color:#fff;
-  }
-  .select-radio {
-    width:100%;
-    background:#21262d;
-    border:1px solid #30363d;
-    color:#c9d1d9;
-    padding:6px;
-    border-radius:4px;
-    font-family:monospace;
-    font-size:12px;
-    margin-top:6px;
-  }
-
-  /* YOUTUBE */
-  .yt-input-row { display:flex; gap:6px; margin-bottom:8px; }
-  .yt-input {
-    flex:1;
-    background:#21262d;
-    border:1px solid #30363d;
-    color:#c9d1d9;
-    padding:8px;
-    border-radius:4px;
-    font-family:monospace;
-    font-size:13px;
-  }
-  .yt-input:focus { outline:none; border-color:#58a6ff; }
-  .yt-load-btn {
-    padding:8px 14px;
-    background:#1f6feb;
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    cursor:pointer;
-    font-family:monospace;
-    font-size:12px;
-    font-weight:bold;
-  }
-  .yt-canal-row { display:flex; gap:6px; margin-bottom:8px; }
-  .yt-canal-link {
-    flex:1;
-    text-align:center;
-    background:#21262d;
-    border:1px solid #30363d;
-    color:#c9d1d9;
-    padding:6px;
-    border-radius:4px;
-    font-size:11px;
-    text-decoration:none;
-  }
-  .yt-canal-link:hover { border-color:#58a6ff; color:#58a6ff; }
-  .video-wrapper {
-    position:relative;
-    width:100%;
-    padding-bottom:56.25%;
-    height:0;
-    overflow:hidden;
-    border-radius:4px;
-    background:#000;
-  }
-  .video-wrapper iframe {
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    border:0;
-  }
-  .yt-controles { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-  .btn-mute {
-    background:#21262d;
-    border-color:#d29922;
-    color:#d29922;
-    font-weight:bold;
-  }
-  .btn-mute.ativado {
-    background:#1f6feb;
-    border-color:#388bfd;
-    color:#fff;
-  }
-
-  /* CRIPTO */
   .crypto-row {
     display:flex;
     justify-content:space-between;
@@ -253,6 +179,17 @@
   .crypto-row:last-child { border-bottom:none; }
 
   /* NOTICIAS */
+  .select-news {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:11px;
+    width:100%;
+    margin-bottom:6px;
+  }
   .news-item {
     border-bottom:1px solid #21262d;
     padding:6px 0;
@@ -267,14 +204,8 @@
 </head>
 <body>
 
-<!-- MENU FIXO — simplificado: Home | Nodes ▾ | Principal
-     Cole este mesmo bloco (com href relativos ajustados) em toda página de node,
-     assim toda página ganha o botão de voltar para a Home. -->
+<!-- MENU: Nodes | Home | Principal ....... Hora -->
 <nav class="menu">
-  <span class="menu-title">📡</span>
-  <a href="home.html" class="active">🏠 Home</a>
-  <span class="menu-sep">|</span>
-
   <div class="dropdown" id="dd-nodes">
     <button class="dropdown-btn" onclick="toggleDD('dd-nodes')">Nodes ▾</button>
     <div class="dropdown-menu">
@@ -288,85 +219,42 @@
       <a href="winceleron.html">🖥️ WIN-CELERON</a>
     </div>
   </div>
-
-  <a href="https://rene-dashboard.github.io/" class="menu-right">⚡ Principal</a>
+  <a href="home.html" class="active">🏠 Home</a>
+  <a href="https://rene-dashboard.github.io/">⚡ Principal</a>
+  <span class="menu-hora" id="hora">--:--:--</span>
 </nav>
 
 <!-- CONTEÚDO -->
 <div class="content">
 
-  <!-- CLIMA + HORA -->
-  <div class="grid2">
-    <div class="card">
-      <div class="card-title">🌡️ Clima</div>
-      <div class="clima-temp" id="temp">--°C</div>
-      <div class="clima-info" id="clima-desc">carregando...</div>
-      <div class="clima-info" id="clima-vento"></div>
-      <div class="clima-info" id="clima-umidade"></div>
-      <div class="clima-info" id="clima-chuva"></div>
-      <div class="horas-row" id="clima-horas"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">⏰ Hora Local</div>
-      <div class="hora-value" id="hora">--:--:--</div>
-      <div class="small" id="data">---</div>
-      <br>
-      <div class="card-title">🌐 IP Público</div>
-      <div class="small" id="ip">carregando...</div>
-      <div class="small" id="ip-pais"></div>
+  <!-- CLIMA — faixa única -->
+  <div class="card">
+    <div class="clima-row" id="clima-row">
+      <span class="temp" id="temp">--°C</span>
+      <span class="sep">|</span>
+      <span id="clima-desc">carregando...</span>
+      <span class="sep">|</span>
+      <span id="clima-vento">💨 --</span>
+      <span class="sep">|</span>
+      <span id="clima-umidade">💧 --</span>
+      <span class="sep">|</span>
+      <span class="prox" id="clima-horas"></span>
     </div>
   </div>
 
-  <!-- RADIO -->
+  <!-- RADIO — faixa única -->
   <div class="card">
-    <div class="card-title">
-      📻 Rádio
-      <span style="float:right;color:#8b949e;font-size:10px" id="radio-indice"></span>
-    </div>
-    <div>
+    <div class="radio-row">
       <span class="radio-dot" id="radio-dot"></span>
-      <span id="radio-status-txt">carregada — toque em ▶ para ouvir</span>
-    </div>
-    <div class="radio-nome" id="radio-nome">---</div>
-    <div class="radio-qualidade" id="radio-qualidade"></div>
-    <select class="select-radio" id="select-radio" onchange="trocarPorSelect(this.value)"></select>
-    <div class="radio-controles">
-      <button class="btn" onclick="anterior()">⏮</button>
-      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Tocar</button>
-      <button class="btn" onclick="proxima()">⏭</button>
+      <span class="radio-nome" id="radio-nome">carregando...</span>
+      <select class="select-radio" id="select-radio" onchange="trocarPorSelect(this.value)"></select>
+      <div class="radio-controles">
+        <button class="btn" onclick="anterior()">⏮</button>
+        <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="proxima()">⏭</button>
+      </div>
     </div>
     <audio id="radio" preload="none"></audio>
-  </div>
-
-  <!-- YOUTUBE -->
-  <div class="card">
-    <div class="card-title">🎬 YouTube — Pânico Jovem Pan</div>
-
-    <div class="yt-canal-row">
-      <a class="yt-canal-link" href="https://www.youtube.com/playlist?list=PLW3mXBgY1SKU-xhQh5OS6PyC5vGe1d7LZ" target="_blank">📡 Abrir canal ao vivo</a>
-      <a class="yt-canal-link" href="https://www.youtube.com/@panicojovempan/videos" target="_blank">🎞️ Últimos vídeos</a>
-    </div>
-
-    <div class="yt-input-row">
-      <input class="yt-input" id="yt-id-input"
-             placeholder="Colar ID do vídeo/live atual"
-             onkeydown="if(event.key==='Enter') carregarVideoId()">
-      <button class="yt-load-btn" onclick="carregarVideoId()">▶ Carregar</button>
-    </div>
-
-    <div class="video-wrapper">
-      <div id="yt-player"></div>
-    </div>
-
-    <div class="yt-controles">
-      <button class="btn" onclick="ytSeek(-10)">⏪ 10s</button>
-      <button class="btn btn-mute" id="btn-mute" onclick="ytToggleMute()">🔇 Ativar áudio</button>
-      <button class="btn" onclick="ytSeek(10)">10s ⏩</button>
-    </div>
-    <div class="small" style="margin-top:6px">
-      💡 Vídeo abre mudo (política de autoplay do navegador). Toque em "Ativar áudio" para ouvir.
-      Como o canal não tem uma live fixa, use "Abrir canal ao vivo" para pegar o ID do vídeo do momento e colar acima.
-    </div>
   </div>
 
   <!-- CRIPTO + NOTICIAS -->
@@ -378,14 +266,13 @@
     </div>
 
     <div class="card">
-      <div class="card-title">📰 Notícias</div>
-      <div style="margin-bottom:6px">
-        <select class="select-radio" id="select-news" onchange="trocarFeedNoticias(this.value)" style="margin-top:0">
-          <option value="g1">🇧🇷 G1</option>
-          <option value="agenciabrasil">🇧🇷 Agência Brasil</option>
-          <option value="cnnbrasil">🇧🇷 CNN Brasil</option>
-        </select>
-      </div>
+      <div class="card-title">📰 Notícias pt-BR</div>
+      <select class="select-news" id="select-news" onchange="trocarFeedNoticias(this.value)">
+        <option value="g1">🇧🇷 G1 — Geral</option>
+        <option value="tecnologia">💻 G1 — Tecnologia</option>
+        <option value="agenciabrasil">🇧🇷 Agência Brasil</option>
+        <option value="cnnbrasil">🇧🇷 CNN Brasil</option>
+      </select>
       <div id="news-container"><div class="small">carregando...</div></div>
     </div>
 
@@ -393,7 +280,6 @@
 
 </div><!-- fim content -->
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 // ─── CONFIG ──────────────────────────────────────────────
 const LAT = -23.55;
@@ -413,14 +299,12 @@ const ESTACOES = [
   { nome:'Big R 90s Alt Rock',     qualidade:'MP3 128kbps', url:'http://bigrradio.cdnstream1.com/5187_128' },
 ];
 
-// Fontes nacionais de credibilidade (pt-BR)
 const FEEDS = {
   g1:            'https://g1.globo.com/dynamo/rss2.xml',
+  tecnologia:    'https://g1.globo.com/dynamo/tecnologia/rss2.xml',
   agenciabrasil: 'https://agenciabrasil.ebc.com.br/rss.xml',
   cnnbrasil:     'https://www.cnnbrasil.com.br/feed/',
 };
-
-const YT_VIDEO_PADRAO = '2XID_W4neJo'; // trocar manualmente pelo ID do momento
 // ─────────────────────────────────────────────────────────
 
 // ── MENU DROPDOWN ────────────────────────────────────────
@@ -433,32 +317,14 @@ document.addEventListener('click', e => {
   }
 });
 
-// ── RELÓGIO ──────────────────────────────────────────────
+// ── RELÓGIO (dentro do menu) ─────────────────────────────
 function atualizarHora() {
-  const agora = new Date();
-  document.getElementById('hora').textContent = agora.toLocaleTimeString('pt-BR');
-  document.getElementById('data').textContent = agora.toLocaleDateString('pt-BR', {
-    weekday:'long', day:'2-digit', month:'long', year:'numeric'
-  });
+  document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR');
 }
 atualizarHora();
 setInterval(atualizarHora, 1000);
 
-// ── IP PÚBLICO ───────────────────────────────────────────
-async function atualizarIP() {
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const d = await r.json();
-    document.getElementById('ip').textContent = d.ip || '---';
-    document.getElementById('ip-pais').textContent = [d.city, d.region, d.country_name].filter(Boolean).join(', ');
-  } catch (e) {
-    document.getElementById('ip').textContent = 'erro ao consultar';
-  }
-}
-atualizarIP();
-setInterval(atualizarIP, 30 * 60 * 1000);
-
-// ── CLIMA (Open-Meteo) ───────────────────────────────────
+// ── CLIMA (Open-Meteo) — faixa única ─────────────────────
 const WMO = {
   0:'☀️ Céu limpo', 1:'🌤️ Poucas nuvens', 2:'⛅ Parc. nublado', 3:'☁️ Nublado',
   45:'🌫️ Neblina', 48:'🌫️ Neblina', 51:'🌦️ Garoa leve', 53:'🌦️ Garoa',
@@ -478,19 +344,18 @@ async function atualizarClima() {
     const cur = d.current;
     document.getElementById('temp').textContent = Math.round(cur.temperature_2m) + '°C';
     document.getElementById('clima-desc').textContent = descWMO(cur.weather_code);
-    document.getElementById('clima-vento').textContent = '💨 Vento: ' + cur.wind_speed_10m + ' km/h';
-    document.getElementById('clima-umidade').textContent = '💧 Umidade: ' + cur.relative_humidity_2m + '%';
-    document.getElementById('clima-chuva').textContent = '🌧️ Precipitação: ' + cur.precipitation + ' mm';
+    document.getElementById('clima-vento').textContent = '💨 ' + cur.wind_speed_10m + ' km/h';
+    document.getElementById('clima-umidade').textContent = '💧 ' + cur.relative_humidity_2m + '%';
 
     const agora = new Date();
     const idx = d.hourly.time.findIndex(t => new Date(t) > agora);
-    const box = document.getElementById('clima-horas');
-    box.innerHTML = '';
-    for (let i = idx; i < idx + 5 && i < d.hourly.time.length; i++) {
+    const partes = [];
+    for (let i = idx; i < idx + 4 && i < d.hourly.time.length; i++) {
       const h = new Date(d.hourly.time[i]).getHours().toString().padStart(2,'0') + 'h';
       const t = Math.round(d.hourly.temperature_2m[i]) + '°';
-      box.insertAdjacentHTML('beforeend', `<div class="hora-item"><div class="h">${h}</div><div class="t">${t}</div></div>`);
+      partes.push(`<b>${h}</b> ${t}`);
     }
+    document.getElementById('clima-horas').innerHTML = partes.join('  ');
   } catch (e) {
     document.getElementById('clima-desc').textContent = 'erro ao consultar clima';
   }
@@ -557,9 +422,7 @@ function trocarFeedNoticias(chave) {
 atualizarNoticias();
 setInterval(atualizarNoticias, 10 * 60 * 1000);
 
-// ── RÁDIO ────────────────────────────────────────────────
-// Carrega a estação mas NÃO toca sozinho: navegadores bloqueiam autoplay
-// de áudio sem gesto do usuário, então o player fica pronto e aguarda o toque em ▶.
+// ── RÁDIO — carrega mas não toca sozinho (autoplay é bloqueado sem gesto) ─
 let estacaoAtual = 0, tocando = false;
 const radio = document.getElementById('radio');
 const sel = document.getElementById('select-radio');
@@ -567,15 +430,12 @@ const sel = document.getElementById('select-radio');
 ESTACOES.forEach((e,i) => {
   const opt = document.createElement('option');
   opt.value = i;
-  opt.textContent = `${e.nome} — ${e.qualidade}`;
+  opt.textContent = e.nome;
   sel.appendChild(opt);
 });
 
 function atualizarUIRadio() {
-  const e = ESTACOES[estacaoAtual];
-  document.getElementById('radio-nome').textContent = e.nome;
-  document.getElementById('radio-qualidade').textContent = e.qualidade;
-  document.getElementById('radio-indice').textContent = `${estacaoAtual+1}/${ESTACOES.length}`;
+  document.getElementById('radio-nome').textContent = ESTACOES[estacaoAtual].nome;
   sel.value = estacaoAtual;
 }
 
@@ -586,11 +446,11 @@ function carregarEstacao(idx, autoplay) {
   atualizarUIRadio();
   if (autoplay) {
     tocando = true;
-    radio.play().catch(()=>{ setStatus('erro','toque em ▶ para tentar de novo'); });
-    setStatus('amarelo','conectando...');
+    radio.play().catch(()=>{ setStatus('erro'); });
+    setStatus('amarelo');
   } else {
     tocando = false;
-    setStatus('parado','carregada — toque em ▶ para ouvir');
+    setStatus('parado');
   }
 }
 
@@ -602,85 +462,45 @@ function togglePlay() {
   if (radio.paused) {
     tocando = true;
     if (!radio.src) radio.src = ESTACOES[estacaoAtual].url;
-    radio.play().catch(()=>{ setStatus('erro','falha ao iniciar — tente de novo'); });
-    document.getElementById('btn-play').textContent = '⏸ Pausar';
+    radio.play().catch(()=>{ setStatus('erro'); });
+    document.getElementById('btn-play').textContent = '⏸';
     document.getElementById('btn-play').classList.add('tocando');
   } else {
     tocando = false;
     radio.pause();
-    document.getElementById('btn-play').textContent = '▶ Tocar';
+    document.getElementById('btn-play').textContent = '▶';
     document.getElementById('btn-play').classList.remove('tocando');
-    setStatus('parado','pausado');
+    setStatus('parado');
   }
 }
 
-function setStatus(estado, txt) {
+function setStatus(estado) {
   const dot = document.getElementById('radio-dot');
   dot.className = 'radio-dot' + (estado === 'verde' ? ' tocando' : estado === 'erro' ? ' erro' : '');
-  document.getElementById('radio-status-txt').textContent = txt;
 }
 
 radio.addEventListener('playing', () => {
-  setStatus('verde','ao vivo ✓');
-  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  setStatus('verde');
+  document.getElementById('btn-play').textContent = '⏸';
   document.getElementById('btn-play').classList.add('tocando');
   tocando = true;
 });
 radio.addEventListener('error', () => {
-  setStatus('erro','erro — reconectando em 8s...');
+  setStatus('erro');
   setTimeout(()=>{ if (tocando) carregarEstacao(estacaoAtual, true); }, 8000);
 });
 radio.addEventListener('stalled', () => {
   if (!tocando) return;
-  setStatus('amarelo','buffering...');
+  setStatus('amarelo');
   setTimeout(()=>{ if (tocando) carregarEstacao(estacaoAtual, true); }, 5000);
 });
 setInterval(()=>{
   if (tocando && (radio.paused || radio.readyState === 0)) {
-    setStatus('amarelo','watchdog — reiniciando...');
     carregarEstacao(estacaoAtual, true);
   }
 }, 30000);
 
 carregarEstacao(0, false); // carrega mas não toca
-
-// ── YOUTUBE (IFrame API — permite mute/seek programático) ─
-let ytPlayer = null;
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player('yt-player', {
-    videoId: YT_VIDEO_PADRAO,
-    playerVars: { autoplay:1, mute:1, controls:1, rel:0, playsinline:1 },
-    events: {
-      onReady: () => { document.getElementById('btn-mute').textContent = '🔇 Ativar áudio'; }
-    }
-  });
-}
-function carregarVideoId() {
-  const id = document.getElementById('yt-id-input').value.trim();
-  if (!id || !ytPlayer) return;
-  ytPlayer.loadVideoById(id);
-  ytPlayer.mute();
-  document.getElementById('btn-mute').classList.remove('ativado');
-  document.getElementById('btn-mute').textContent = '🔇 Ativar áudio';
-}
-function ytToggleMute() {
-  if (!ytPlayer) return;
-  const btn = document.getElementById('btn-mute');
-  if (ytPlayer.isMuted()) {
-    ytPlayer.unMute();
-    btn.textContent = '🔊 Áudio ativo';
-    btn.classList.add('ativado');
-  } else {
-    ytPlayer.mute();
-    btn.textContent = '🔇 Ativar áudio';
-    btn.classList.remove('ativado');
-  }
-}
-function ytSeek(segundos) {
-  if (!ytPlayer) return;
-  const atual = ytPlayer.getCurrentTime();
-  ytPlayer.seekTo(atual + segundos, true);
-}
 </script>
 </body>
 </html>
