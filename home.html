@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -148,8 +149,10 @@
     font-size:12px;
   }
   .btn:active { background:#30363d; }
+  .btn:disabled { opacity:0.5; cursor:default; }
   .btn-play { border-color:#3fb950; color:#3fb950; font-weight:bold; }
   .btn-play.tocando { background:#1f6feb; border-color:#388bfd; color:#fff; }
+  .btn-block { width:100%; margin-top:6px; }
   .select-radio {
     background:#21262d;
     border:1px solid #30363d;
@@ -200,6 +203,18 @@
   .news-item a { color:#c9d1d9; text-decoration:none; }
   .news-item a:hover { color:#58a6ff; }
   .news-source { font-size:10px; color:#8b949e; margin-bottom:2px; }
+
+  /* PING / SPEED TEST */
+  .net-resultado {
+    margin:6px 0;
+    font-size:13px;
+    min-height:16px;
+  }
+  .net-resultado .destaque {
+    font-size:16px;
+    font-weight:bold;
+    color:#e6edf3;
+  }
 </style>
 </head>
 <body>
@@ -274,6 +289,25 @@
         <option value="cnnbrasil">🇧🇷 CNN Brasil</option>
       </select>
       <div id="news-container"><div class="small">carregando...</div></div>
+    </div>
+
+  </div>
+
+  <!-- PING + SPEED TEST -->
+  <div class="grid2">
+
+    <div class="card">
+      <div class="card-title">📶 Ping Test</div>
+      <div class="small" id="ping-status">pronto para testar</div>
+      <div class="net-resultado" id="ping-resultado"></div>
+      <button class="btn btn-block" id="btn-ping" onclick="testarPing()">▶ Testar Ping</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚀 Speed Test</div>
+      <div class="small" id="speed-status">pronto para testar (10MB via Cloudflare)</div>
+      <div class="net-resultado" id="speed-resultado"></div>
+      <button class="btn btn-block" id="btn-speed" onclick="testarVelocidade()">▶ Testar Velocidade</button>
     </div>
 
   </div>
@@ -364,7 +398,7 @@ atualizarClima();
 setInterval(atualizarClima, 10 * 60 * 1000);
 
 // ── CRIPTO (CoinGecko) ───────────────────────────────────
-const MOEDAS = { bitcoin:'BTC', ethereum:'ETH', tether:'USDT', binancecoin:'BNB', solana:'SOL' };
+const MOEDAS = { bitcoin:'BTC', ethereum:'ETH', tether:'USDT', binancecoin:'BNB', solana:'SOL', litecoin:'LTC' };
 async function atualizarCripto() {
   try {
     const ids = Object.keys(MOEDAS).join(',');
@@ -421,6 +455,83 @@ function trocarFeedNoticias(chave) {
 }
 atualizarNoticias();
 setInterval(atualizarNoticias, 10 * 60 * 1000);
+
+// ── PING TEST (Cloudflare trace endpoint) ────────────────
+let pingando = false;
+async function testarPing() {
+  if (pingando) return;
+  pingando = true;
+  const btn = document.getElementById('btn-ping');
+  const status = document.getElementById('ping-status');
+  const resultado = document.getElementById('ping-resultado');
+  btn.disabled = true;
+  status.textContent = 'testando... (5 amostras)';
+  resultado.innerHTML = '';
+
+  const alvo = 'https://speed.cloudflare.com/cdn-cgi/trace';
+  const tempos = [];
+  for (let i = 0; i < 5; i++) {
+    try {
+      const t0 = performance.now();
+      await fetch(alvo, { cache: 'no-store', mode: 'cors' });
+      tempos.push(performance.now() - t0);
+    } catch (e) {
+      // amostra falhou, ignora e segue
+    }
+    status.textContent = `testando... (${i + 1}/5)`;
+  }
+
+  if (tempos.length === 0) {
+    status.textContent = 'erro: nenhuma resposta (verifique a conexão)';
+    btn.disabled = false;
+    pingando = false;
+    return;
+  }
+
+  const min = Math.min(...tempos);
+  const max = Math.max(...tempos);
+  const media = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+  const corMedia = media < 100 ? 'green' : media < 250 ? '' : 'red';
+
+  status.textContent = `${tempos.length}/5 respostas · alvo: Cloudflare edge`;
+  resultado.innerHTML =
+    `min <b>${min.toFixed(0)}ms</b> &nbsp;|&nbsp; méd <b class="${corMedia}">${media.toFixed(0)}ms</b> &nbsp;|&nbsp; max <b>${max.toFixed(0)}ms</b>`;
+
+  btn.disabled = false;
+  pingando = false;
+}
+
+// ── SPEED TEST (download via Cloudflare) ─────────────────
+let testandoVelocidade = false;
+async function testarVelocidade() {
+  if (testandoVelocidade) return;
+  testandoVelocidade = true;
+  const btn = document.getElementById('btn-speed');
+  const status = document.getElementById('speed-status');
+  const resultado = document.getElementById('speed-resultado');
+  btn.disabled = true;
+  resultado.innerHTML = '';
+
+  const bytesAlvo = 10 * 1024 * 1024; // 10MB
+  const url = `https://speed.cloudflare.com/__down?bytes=${bytesAlvo}`;
+  status.textContent = 'baixando arquivo de teste (10MB)...';
+
+  try {
+    const t0 = performance.now();
+    const r = await fetch(url, { cache: 'no-store' });
+    const blob = await r.blob();
+    const segundos = (performance.now() - t0) / 1000;
+    const mbps = (blob.size * 8) / segundos / 1_000_000;
+
+    status.textContent = `${(blob.size / 1024 / 1024).toFixed(1)}MB em ${segundos.toFixed(1)}s`;
+    resultado.innerHTML = `<span class="destaque">${mbps.toFixed(1)} Mbps</span> ↓ download`;
+  } catch (e) {
+    status.textContent = 'erro ao testar velocidade';
+  }
+
+  btn.disabled = false;
+  testandoVelocidade = false;
+}
 
 // ── RÁDIO — carrega mas não toca sozinho (autoplay é bloqueado sem gesto) ─
 let estacaoAtual = 0, tocando = false;
