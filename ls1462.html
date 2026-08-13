@@ -1,1 +1,317 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LS1462 — Painel</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0d1117;
+    color:#c9d1d9;
+    font-family:monospace;
+    font-size:14px;
+    min-height:100vh;
+  }
+  .topo {
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 12px;
+  }
+  .topo .titulo { color:#58a6ff; font-weight:bold; font-size:13px; }
+  .topo .hora { color:#58a6ff; font-size:16px; font-weight:bold; }
+
+  .content { padding:10px; max-width:480px; margin:0 auto; }
+
+  .card {
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:6px;
+    padding:10px 12px;
+    margin-bottom:10px;
+  }
+  .card-title {
+    color:#58a6ff;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:8px;
+  }
+  .small { font-size:11px; color:#8b949e; }
+
+  /* CLIMA */
+  .clima-row {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    font-size:13px;
+  }
+  .clima-row .temp { font-size:26px; font-weight:bold; color:#e6edf3; }
+  .clima-row .sep { color:#30363d; }
+  .clima-horas { margin-top:8px; color:#8b949e; font-size:12px; }
+  .clima-horas b { color:#c9d1d9; }
+
+  /* RADIO */
+  .radio-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .radio-dot {
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:#8b949e; flex-shrink:0;
+  }
+  .radio-dot.tocando { background:#3fb950; animation:pulse 2s infinite; }
+  .radio-dot.erro { background:#f85149; animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .radio-nome { font-size:13px; color:#e6edf3; flex:1; min-width:120px; }
+  .radio-controles { display:flex; gap:6px; }
+  .btn {
+    background:#21262d; border:1px solid #30363d; color:#c9d1d9;
+    padding:7px 12px; border-radius:4px; cursor:pointer;
+    font-family:monospace; font-size:13px;
+  }
+  .btn:active { background:#30363d; }
+  .btn-play { border-color:#3fb950; color:#3fb950; font-weight:bold; }
+  .btn-play.tocando { background:#1f6feb; border-color:#388bfd; color:#fff; }
+  .btn-block { width:100%; margin-top:8px; }
+  .select-radio {
+    background:#21262d; border:1px solid #30363d; color:#c9d1d9;
+    padding:6px; border-radius:4px; font-family:monospace;
+    font-size:12px; width:100%; margin-top:8px;
+  }
+
+  /* PING */
+  .net-resultado { margin:8px 0; font-size:14px; min-height:18px; }
+  .net-resultado .destaque { font-size:18px; font-weight:bold; color:#e6edf3; }
+  .green { color:#3fb950; }
+  .red { color:#f85149; }
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <span class="titulo">🕹️ LS1462</span>
+  <span class="hora" id="hora">--:--:--</span>
+</div>
+
+<div class="content">
+
+  <!-- CLIMA -->
+  <div class="card">
+    <div class="card-title">🌤️ Clima</div>
+    <div class="clima-row">
+      <span class="temp" id="temp">--°C</span>
+      <span class="sep">|</span>
+      <span id="clima-desc">carregando...</span>
+      <span class="sep">|</span>
+      <span id="clima-vento">💨 --</span>
+      <span class="sep">|</span>
+      <span id="clima-umidade">💧 --</span>
+    </div>
+    <div class="clima-horas" id="clima-horas"></div>
+  </div>
+
+  <!-- RADIO -->
+  <div class="card">
+    <div class="card-title">📻 Rádio</div>
+    <div class="radio-row">
+      <span class="radio-dot" id="radio-dot"></span>
+      <span class="radio-nome" id="radio-nome">carregando...</span>
+      <div class="radio-controles">
+        <button class="btn" onclick="anterior()">⏮</button>
+        <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="proxima()">⏭</button>
+      </div>
+    </div>
+    <select class="select-radio" id="select-radio" onchange="trocarPorSelect(this.value)"></select>
+    <audio id="radio" preload="none"></audio>
+  </div>
+
+  <!-- PING -->
+  <div class="card">
+    <div class="card-title">📶 Ping Test</div>
+    <div class="small" id="ping-status">pronto para testar</div>
+    <div class="net-resultado" id="ping-resultado"></div>
+    <button class="btn btn-block" id="btn-ping" onclick="testarPing()">▶ Testar Ping</button>
+  </div>
+
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const LAT = -23.55;
+const LON = -46.63;
+
+const ESTACOES = [
+  { nome:'Radio Paradise Rock',    url:'http://stream.radioparadise.com/rock-128' },
+  { nome:'RADIO BOB Classic Rock', url:'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
+  { nome:'RADIO BOB National',     url:'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
+  { nome:'STAR FM Classic Rock',   url:'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
+  { nome:'STAR FM Country Rock',   url:'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
+  { nome:'Big R 80s Metal',        url:'http://bigrradio.cdnstream1.com/5186_128' },
+  { nome:'Big R 90s Alt Rock',     url:'http://bigrradio.cdnstream1.com/5187_128' },
+];
+// ─────────────────────────────────────────────────────────
+
+// ── RELÓGIO ───────────────────────────────────────────────
+function atualizarHora() {
+  document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR');
+}
+atualizarHora();
+setInterval(atualizarHora, 1000);
+
+// ── CLIMA (Open-Meteo) ───────────────────────────────────
+const WMO = {
+  0:'☀️ Céu limpo', 1:'🌤️ Poucas nuvens', 2:'⛅ Parc. nublado', 3:'☁️ Nublado',
+  45:'🌫️ Neblina', 48:'🌫️ Neblina', 51:'🌦️ Garoa leve', 53:'🌦️ Garoa',
+  55:'🌦️ Garoa forte', 61:'🌧️ Chuva leve', 63:'🌧️ Chuva', 65:'🌧️ Chuva forte',
+  71:'🌨️ Neve leve', 73:'🌨️ Neve', 75:'🌨️ Neve forte', 80:'🌦️ Pancadas',
+  81:'🌧️ Pancadas', 82:'⛈️ Pancadas fortes', 95:'⛈️ Tempestade', 96:'⛈️ Tempestade c/ granizo'
+};
+function descWMO(code) { return WMO[code] || '🌡️ —'; }
+
+async function atualizarClima() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code` +
+      `&hourly=temperature_2m,weather_code&timezone=auto`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const cur = d.current;
+    document.getElementById('temp').textContent = Math.round(cur.temperature_2m) + '°C';
+    document.getElementById('clima-desc').textContent = descWMO(cur.weather_code);
+    document.getElementById('clima-vento').textContent = '💨 ' + cur.wind_speed_10m + ' km/h';
+    document.getElementById('clima-umidade').textContent = '💧 ' + cur.relative_humidity_2m + '%';
+
+    const agora = new Date();
+    const idx = d.hourly.time.findIndex(t => new Date(t) > agora);
+    const partes = [];
+    for (let i = idx; i < idx + 4 && i < d.hourly.time.length; i++) {
+      const h = new Date(d.hourly.time[i]).getHours().toString().padStart(2,'0') + 'h';
+      const t = Math.round(d.hourly.temperature_2m[i]) + '°';
+      partes.push(`<b>${h}</b> ${t}`);
+    }
+    document.getElementById('clima-horas').innerHTML = partes.join('  ');
+  } catch (e) {
+    document.getElementById('clima-desc').textContent = 'erro ao consultar clima';
+  }
+}
+atualizarClima();
+setInterval(atualizarClima, 10 * 60 * 1000);
+
+// ── PING TEST (Cloudflare trace endpoint) ────────────────
+let pingando = false;
+async function testarPing() {
+  if (pingando) return;
+  pingando = true;
+  const btn = document.getElementById('btn-ping');
+  const status = document.getElementById('ping-status');
+  const resultado = document.getElementById('ping-resultado');
+  btn.disabled = true;
+  status.textContent = 'testando... (5 amostras)';
+  resultado.innerHTML = '';
+
+  const alvo = 'https://speed.cloudflare.com/cdn-cgi/trace';
+  const tempos = [];
+  for (let i = 0; i < 5; i++) {
+    try {
+      const t0 = performance.now();
+      await fetch(alvo, { cache: 'no-store', mode: 'cors' });
+      tempos.push(performance.now() - t0);
+    } catch (e) {}
+    status.textContent = `testando... (${i + 1}/5)`;
+  }
+
+  if (tempos.length === 0) {
+    status.textContent = 'erro: nenhuma resposta (verifique a conexão)';
+    btn.disabled = false;
+    pingando = false;
+    return;
+  }
+
+  const min = Math.min(...tempos);
+  const max = Math.max(...tempos);
+  const media = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+  const corMedia = media < 100 ? 'green' : media < 250 ? '' : 'red';
+
+  status.textContent = `${tempos.length}/5 respostas · alvo: Cloudflare edge`;
+  resultado.innerHTML =
+    `min <b>${min.toFixed(0)}ms</b> &nbsp;|&nbsp; méd <b class="${corMedia}">${media.toFixed(0)}ms</b> &nbsp;|&nbsp; max <b>${max.toFixed(0)}ms</b>`;
+
+  btn.disabled = false;
+  pingando = false;
+}
+
+// ── RÁDIO ─────────────────────────────────────────────────
+let estacaoAtual = 0, tocando = false;
+const radio = document.getElementById('radio');
+const sel = document.getElementById('select-radio');
+
+ESTACOES.forEach((e,i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = e.nome;
+  sel.appendChild(opt);
+});
+
+function atualizarUIRadio() {
+  document.getElementById('radio-nome').textContent = ESTACOES[estacaoAtual].nome;
+  sel.value = estacaoAtual;
+}
+
+function carregarEstacao(idx, autoplay) {
+  estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
+  radio.src = ESTACOES[estacaoAtual].url;
+  radio.load();
+  atualizarUIRadio();
+  if (autoplay) {
+    tocando = true;
+    radio.play().catch(()=>{ setStatus('erro'); });
+  } else {
+    tocando = false;
+    setStatus('parado');
+  }
+}
+
+function proxima()  { carregarEstacao(estacaoAtual+1, tocando); }
+function anterior() { carregarEstacao(estacaoAtual-1, tocando); }
+function trocarPorSelect(idx) { carregarEstacao(parseInt(idx), tocando); }
+
+function togglePlay() {
+  if (radio.paused) {
+    tocando = true;
+    if (!radio.src) radio.src = ESTACOES[estacaoAtual].url;
+    radio.play().catch(()=>{ setStatus('erro'); });
+    document.getElementById('btn-play').textContent = '⏸';
+    document.getElementById('btn-play').classList.add('tocando');
+  } else {
+    tocando = false;
+    radio.pause();
+    document.getElementById('btn-play').textContent = '▶';
+    document.getElementById('btn-play').classList.remove('tocando');
+    setStatus('parado');
+  }
+}
+
+function setStatus(estado) {
+  const dot = document.getElementById('radio-dot');
+  dot.className = 'radio-dot' + (estado === 'verde' ? ' tocando' : estado === 'erro' ? ' erro' : '');
+}
+
+radio.addEventListener('playing', () => {
+  setStatus('verde');
+  document.getElementById('btn-play').textContent = '⏸';
+  document.getElementById('btn-play').classList.add('tocando');
+  tocando = true;
+});
+radio.addEventListener('error', () => {
+  setStatus('erro');
+  setTimeout(()=>{ if (tocando) carregarEstacao(estacaoAtual, true); }, 8000);
+});
+
+carregarEstacao(0, false);
+</script>
+</body>
+</html>
