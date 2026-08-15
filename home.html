@@ -137,7 +137,7 @@
   .radio-dot.erro { background:#f85149; animation:pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .radio-nome { font-size:12px; color:#e6edf3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
-  .radio-controles { display:flex; gap:5px; margin-left:auto; }
+  .radio-controles { display:flex; gap:5px; margin-left:auto; align-items:center; }
   .btn {
     background:#21262d;
     border:1px solid #30363d;
@@ -163,6 +163,41 @@
     font-size:11px;
     max-width:140px;
   }
+
+  /* VOLUME */
+  .volume-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+  }
+  .volume-row .icone { font-size:13px; flex-shrink:0; width:16px; text-align:center; }
+  .volume-row input[type="range"] {
+    -webkit-appearance:none;
+    appearance:none;
+    flex:1;
+    height:4px;
+    background:#30363d;
+    border-radius:2px;
+    outline:none;
+  }
+  .volume-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance:none;
+    appearance:none;
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#58a6ff;
+    cursor:pointer;
+    border:none;
+  }
+  .volume-row input[type="range"]::-moz-range-thumb {
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#58a6ff;
+    cursor:pointer;
+    border:none;
+  }
+  .volume-valor { font-size:11px; color:#8b949e; width:32px; text-align:right; flex-shrink:0; }
 
   /* CRIPTO */
   .card-title {
@@ -268,6 +303,11 @@
         <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶</button>
         <button class="btn" onclick="proxima()">⏭</button>
       </div>
+    </div>
+    <div class="volume-row">
+      <span class="icone" id="volume-icone">🔊</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="40" oninput="ajustarVolume(this.value)">
+      <span class="volume-valor" id="volume-valor">40%</span>
     </div>
     <audio id="radio" preload="none"></audio>
   </div>
@@ -533,10 +573,22 @@ async function testarVelocidade() {
   testandoVelocidade = false;
 }
 
+// ── VOLUME ────────────────────────────────────────────────
+function ajustarVolume(valor) {
+  radio.volume = valor / 100;
+  document.getElementById('volume-valor').textContent = valor + '%';
+  const icone = document.getElementById('volume-icone');
+  if (valor == 0) icone.textContent = '🔇';
+  else if (valor < 50) icone.textContent = '🔉';
+  else icone.textContent = '🔊';
+}
+
 // ── RÁDIO — carrega mas não toca sozinho (autoplay é bloqueado sem gesto) ─
 let estacaoAtual = 0, tocando = false;
 const radio = document.getElementById('radio');
 const sel = document.getElementById('select-radio');
+
+radio.volume = 0.4; // volume inicial em 40%, ajustável pelo slider
 
 ESTACOES.forEach((e,i) => {
   const opt = document.createElement('option');
