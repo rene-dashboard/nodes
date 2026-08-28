@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -239,6 +238,27 @@
   .news-item a:hover { color:#58a6ff; }
   .news-source { font-size:10px; color:#8b949e; margin-bottom:2px; }
 
+  /* GRAFICO FUTUROS */
+  .futuros-topo {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+  }
+  .futuros-preco {
+    margin-left:auto;
+    font-size:12px;
+    color:#e6edf3;
+    font-weight:bold;
+  }
+  #tv_futuros_container {
+    height:320px;
+    width:100%;
+    border-radius:4px;
+    overflow:hidden;
+  }
+
   /* PING / SPEED TEST */
   .net-resultado {
     margin:6px 0;
@@ -310,6 +330,16 @@
       <span class="volume-valor" id="volume-valor">40%</span>
     </div>
     <audio id="radio" preload="none"></audio>
+  </div>
+
+  <!-- GRAFICO FUTUROS (TradingView, leve e gratuito) -->
+  <div class="card">
+    <div class="card-title">📈 Gráfico</div>
+    <div class="futuros-topo">
+      <select class="select-radio" id="select-futuros" style="max-width:120px;" onchange="trocarGraficoFuturos(this.value)"></select>
+      <span class="futuros-preco" id="futuros-preco-brl"></span>
+    </div>
+    <div id="tv_futuros_container"></div>
   </div>
 
   <!-- CRIPTO + NOTICIAS -->
@@ -447,14 +477,19 @@ async function atualizarCripto() {
     const d = await r.json();
     const box = document.getElementById('crypto-container');
     box.innerHTML = '';
-    Object.entries(MOEDAS).forEach(([id, sigla]) => {
-      const p = d[id];
-      if (!p) return;
-      const variacao = p.usd_24h_change ?? 0;
+    const lista = Object.entries(MOEDAS)
+      .filter(([id]) => d[id])
+      .map(([id, sigla]) => ({
+        sigla,
+        preco: d[id].usd,
+        variacao: d[id].usd_24h_change ?? 0
+      }))
+      .sort((a, b) => b.variacao - a.variacao); // maior alta -> maior queda
+    lista.forEach(({ sigla, preco, variacao }) => {
       const cor = variacao >= 0 ? 'green' : 'red';
       const seta = variacao >= 0 ? '▲' : '▼';
       box.insertAdjacentHTML('beforeend',
-        `<div class="crypto-row"><span>${sigla}</span><span>$${p.usd.toLocaleString('en-US')}
+        `<div class="crypto-row"><span>${sigla}</span><span>$${preco.toLocaleString('en-US')}
           <span class="${cor}">${seta}${Math.abs(variacao).toFixed(1)}%</span></span></div>`);
     });
   } catch (e) {
@@ -495,6 +530,79 @@ function trocarFeedNoticias(chave) {
 }
 atualizarNoticias();
 setInterval(atualizarNoticias, 10 * 60 * 1000);
+
+// ── GRAFICO FUTUROS (TradingView) ────────────────────────
+// TradingView oferece um widget de gráfico gratuito, sem login, que carrega
+// só o chart (muito mais leve que abrir a página inteira da Binance).
+// Símbolo usado é o mesmo dos futuros perpétuos da Binance (ex: SOLUSDT.P),
+// já que a Binance Futures não tem contrato nativo em BRL — por isso o rótulo
+// do seletor mostra "/BRL" (preço de referência convertido ao lado) mas o
+// gráfico em si segue cotado em USDT, igual ao link de exemplo enviado.
+const MOEDAS_FUTUROS = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana', LTC:'litecoin' };
+
+function popularSelectFuturos() {
+  const sel = document.getElementById('select-futuros');
+  Object.keys(MOEDAS_FUTUROS).forEach(sigla => {
+    const opt = document.createElement('option');
+    opt.value = sigla;
+    opt.textContent = sigla + '/USDT';
+    sel.appendChild(opt);
+  });
+  // opção extra: USDT/BRL é par spot (não existe futuro USDT/BRL na Binance)
+  const optBRL = document.createElement('option');
+  optBRL.value = 'USDTBRL';
+  optBRL.textContent = 'USDT/BRL';
+  sel.appendChild(optBRL);
+  sel.value = 'BTC';
+}
+
+function carregarGraficoFuturos(sigla) {
+  const container = document.getElementById('tv_futuros_container');
+  container.innerHTML = '';
+  const symbol = sigla === 'USDTBRL' ? 'BINANCE:USDTBRL' : 'BINANCE:' + sigla + 'USDT.P';
+  new TradingView.widget({
+    "width": "100%",
+    "height": 320,
+    "symbol": symbol,
+    "interval": "15",
+    "timezone": "America/Sao_Paulo",
+    "theme": "dark",
+    "style": "1",
+    "locale": "br",
+    "toolbar_bg": "#161b22",
+    "enable_publishing": false,
+    "hide_side_toolbar": true,
+    "allow_symbol_change": false,
+    "save_image": false,
+    "container_id": "tv_futuros_container"
+  });
+}
+
+async function atualizarPrecoLateral(sigla) {
+  const el = document.getElementById('futuros-preco-brl');
+  el.textContent = '...';
+  try {
+    if (sigla === 'USDTBRL') {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=brl');
+      const d = await r.json();
+      el.textContent = 'R$ ' + d.tether.brl.toLocaleString('pt-BR', { maximumFractionDigits: 4 });
+    } else {
+      const id = MOEDAS_FUTUROS[sigla];
+      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+      const d = await r.json();
+      el.textContent = '$' + d[id].usd.toLocaleString('en-US');
+    }
+  } catch (e) {
+    el.textContent = '';
+  }
+}
+
+function trocarGraficoFuturos(sigla) {
+  carregarGraficoFuturos(sigla);
+  atualizarPrecoLateral(sigla);
+}
+
+popularSelectFuturos();
 
 // ── PING TEST (Cloudflare trace endpoint) ────────────────
 let pingando = false;
@@ -665,5 +773,9 @@ setInterval(()=>{
 
 carregarEstacao(0, false); // carrega mas não toca
 </script>
+
+<!-- Biblioteca do widget TradingView — carregada só uma vez; ao terminar,
+     já inicializa o gráfico de futuros com BTC selecionado por padrão -->
+<script src="https://s3.tradingview.com/tv.js" onload="trocarGraficoFuturos('BTC')"></script>
 </body>
 </html>
