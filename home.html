@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -258,6 +258,35 @@
     border-radius:4px;
     overflow:hidden;
   }
+  .btn-tela-cheia {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px 8px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:monospace;
+    font-size:13px;
+    line-height:1;
+  }
+  .btn-tela-cheia:active { background:#30363d; }
+
+  /* TELA CHEIA (pseudo-fullscreen via CSS, funciona em qualquer navegador/iOS) */
+  body.tela-cheia-ativa { overflow:hidden; }
+  #card-futuros.tela-cheia {
+    position:fixed;
+    inset:0;
+    z-index:1200;
+    margin:0;
+    border-radius:0;
+    display:flex;
+    flex-direction:column;
+    padding:10px;
+  }
+  #card-futuros.tela-cheia #tv_futuros_container {
+    flex:1;
+    height:auto;
+  }
 
   /* PING / SPEED TEST */
   .net-resultado {
@@ -333,11 +362,12 @@
   </div>
 
   <!-- GRAFICO FUTUROS (TradingView, leve e gratuito) -->
-  <div class="card">
+  <div class="card" id="card-futuros">
     <div class="card-title">📈 Gráfico</div>
     <div class="futuros-topo">
       <select class="select-radio" id="select-futuros" style="max-width:120px;" onchange="trocarGraficoFuturos(this.value)"></select>
       <span class="futuros-preco" id="futuros-preco-brl"></span>
+      <button class="btn-tela-cheia" id="btn-tela-cheia-futuros" onclick="toggleTelaCheiaFuturos()">⛶</button>
     </div>
     <div id="tv_futuros_container"></div>
   </div>
@@ -601,6 +631,26 @@ function trocarGraficoFuturos(sigla) {
   carregarGraficoFuturos(sigla);
   atualizarPrecoLateral(sigla);
 }
+
+// ── TELA CHEIA DO GRÁFICO ─────────────────────────────────
+// Usa uma "tela cheia" via CSS (position:fixed cobrindo a viewport) em vez
+// da Fullscreen API nativa, porque no Safari/iOS a API de fullscreen não
+// funciona em divs comuns (só em <video>). Assim funciona em qualquer navegador.
+let futurosTelaCheia = false;
+function toggleTelaCheiaFuturos() {
+  const card = document.getElementById('card-futuros');
+  futurosTelaCheia = !futurosTelaCheia;
+  card.classList.toggle('tela-cheia', futurosTelaCheia);
+  document.body.classList.toggle('tela-cheia-ativa', futurosTelaCheia);
+  document.getElementById('btn-tela-cheia-futuros').textContent = futurosTelaCheia ? '✕' : '⛶';
+  // recarrega o widget para ele se ajustar ao novo tamanho do container
+  setTimeout(() => {
+    carregarGraficoFuturos(document.getElementById('select-futuros').value);
+  }, 60);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && futurosTelaCheia) toggleTelaCheiaFuturos();
+});
 
 popularSelectFuturos();
 
