@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="21600">
 <link rel="manifest" href="/nodes/manifest.json">
-<title>HPWIN Node</title>
+<title>Home — Nodes</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -13,74 +13,198 @@
     color:#c9d1d9;
     font-family:monospace;
     font-size:14px;
-    padding:8px;
+    min-height:100vh;
   }
+
+  /* MENU FIXO — cole este bloco em toda página de node (ajustando os href relativos)
+     assim toda página ganha navegação e volta para a Home. */
+  .menu {
+    position:fixed;
+    top:0; left:0; right:0;
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    align-items:center;
+    padding:0 8px;
+    height:38px;
+    z-index:999;
+    gap:4px;
+  }
+  .menu a {
+    color:#c9d1d9;
+    text-decoration:none;
+    padding:5px 9px;
+    border-radius:4px;
+    font-size:12px;
+    white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .menu a:hover { border-color:#30363d; color:#58a6ff; }
+  .menu a.active {
+    background:#1f6feb22;
+    border-color:#1f6feb;
+    color:#58a6ff;
+  }
+  .menu-hora {
+    margin-left:auto;
+    color:#58a6ff;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+    padding-right:4px;
+  }
+
+  /* NODES DROPDOWN */
+  .dropdown { position:relative; }
+  .dropdown-btn {
+    color:#c9d1d9;
+    padding:5px 9px;
+    border-radius:4px;
+    font-size:12px;
+    white-space:nowrap;
+    border:1px solid transparent;
+    background:none;
+    cursor:pointer;
+    font-family:monospace;
+  }
+  .dropdown-btn:hover { border-color:#30363d; color:#58a6ff; }
+  .dropdown-menu {
+    display:none;
+    position:absolute;
+    top:34px; left:0;
+    background:#161b22;
+    border:1px solid #30363d;
+    border-radius:6px;
+    min-width:170px;
+    z-index:1000;
+    overflow:hidden;
+  }
+  .dropdown-menu a {
+    display:block;
+    padding:8px 12px;
+    border-bottom:1px solid #21262d;
+    border-radius:0;
+  }
+  .dropdown-menu a:last-child { border-bottom:none; }
+  .dropdown-menu a:hover { background:#21262d; color:#58a6ff; }
+  .dropdown.open .dropdown-menu { display:block; }
+
+  /* CONTEÚDO */
+  .content { padding:46px 8px 8px; }
+
   .card {
     background:#161b22;
     border:1px solid #30363d;
     border-radius:6px;
-    padding:10px;
+    padding:8px 10px;
     margin-bottom:8px;
   }
-  .card-title {
-    color:#58a6ff;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin-bottom:6px;
-  }
-  .value { font-size:18px; color:#e6edf3; font-weight:bold; }
-  .small { font-size:12px; color:#8b949e; }
+  .small { font-size:11px; color:#8b949e; }
   .green { color:#3fb950; }
-  .yellow { color:#d29922; }
   .red { color:#f85149; }
-  .blue { color:#58a6ff; }
   .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+
+  /* CLIMA — faixa única e estreita */
+  .clima-row {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    overflow-x:auto;
+    white-space:nowrap;
+    font-size:12px;
+  }
+  .clima-row .temp { font-size:18px; font-weight:bold; color:#e6edf3; }
+  .clima-row .sep { color:#30363d; }
+  .clima-row .prox { color:#8b949e; }
+  .clima-row .prox b { color:#c9d1d9; }
+
+  /* RADIO — faixa única */
+  .radio-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
   .radio-dot {
     display:inline-block;
-    width:8px; height:8px;
+    width:7px; height:7px;
     border-radius:50%;
-    background:#3fb950;
-    margin-right:6px;
-    animation:pulse 2s infinite;
+    background:#8b949e;
+    flex-shrink:0;
   }
+  .radio-dot.tocando { background:#3fb950; animation:pulse 2s infinite; }
+  .radio-dot.erro { background:#f85149; animation:pulse 1s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .radio-nome { font-size:13px; color:#e6edf3; font-weight:bold; margin:6px 0 2px; }
-  .radio-qualidade { font-size:11px; color:#8b949e; margin-bottom:8px; }
-  .radio-controles { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .radio-nome { font-size:12px; color:#e6edf3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:150px; }
+  .radio-controles { display:flex; gap:5px; margin-left:auto; align-items:center; }
   .btn {
     background:#21262d;
     border:1px solid #30363d;
     color:#c9d1d9;
-    padding:6px 12px;
+    padding:5px 10px;
     border-radius:4px;
     cursor:pointer;
     font-family:monospace;
     font-size:12px;
   }
   .btn:active { background:#30363d; }
-  .btn-play {
-    background:#1f6feb;
-    border-color:#388bfd;
-    color:#fff;
-    font-weight:bold;
-  }
-  .btn-play.pausado {
-    background:#21262d;
-    border-color:#f85149;
-    color:#f85149;
-  }
-  .select-estacao {
-    width:100%;
+  .btn:disabled { opacity:0.5; cursor:default; }
+  .btn-play { border-color:#3fb950; color:#3fb950; font-weight:bold; }
+  .btn-play.tocando { background:#1f6feb; border-color:#388bfd; color:#fff; }
+  .btn-block { width:100%; margin-top:6px; }
+  .select-radio {
     background:#21262d;
     border:1px solid #30363d;
     color:#c9d1d9;
-    padding:6px;
+    padding:4px 6px;
     border-radius:4px;
     font-family:monospace;
-    font-size:12px;
-    margin-top:6px;
+    font-size:11px;
+    max-width:140px;
+  }
+
+  /* VOLUME */
+  .volume-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+  }
+  .volume-row .icone { font-size:13px; flex-shrink:0; width:16px; text-align:center; }
+  .volume-row input[type="range"] {
+    -webkit-appearance:none;
+    appearance:none;
+    flex:1;
+    height:4px;
+    background:#30363d;
+    border-radius:2px;
+    outline:none;
+  }
+  .volume-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance:none;
+    appearance:none;
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#58a6ff;
+    cursor:pointer;
+    border:none;
+  }
+  .volume-row input[type="range"]::-moz-range-thumb {
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#58a6ff;
+    cursor:pointer;
+    border:none;
+  }
+  .volume-valor { font-size:11px; color:#8b949e; width:32px; text-align:right; flex-shrink:0; }
+
+  /* CRIPTO */
+  .card-title {
+    color:#58a6ff;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:8px;
   }
   .crypto-row {
     display:flex;
@@ -90,480 +214,623 @@
     font-size:13px;
   }
   .crypto-row:last-child { border-bottom:none; }
+
+  /* NOTICIAS */
+  .select-news {
+    background:#21262d;
+    border:1px solid #30363d;
+    color:#c9d1d9;
+    padding:5px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:11px;
+    width:100%;
+    margin-bottom:6px;
+  }
   .news-item {
     border-bottom:1px solid #21262d;
     padding:6px 0;
     font-size:12px;
-    line-height:1.4;
+    line-height:1.5;
   }
   .news-item:last-child { border-bottom:none; }
-  .video-wrapper {
-    position:relative;
-    width:100%;
-    padding-bottom:56.25%;
-    height:0;
-    overflow:hidden;
-    border-radius:4px;
-  }
-  .video-wrapper iframe {
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    border:0;
-  }
-  .clima-temp { font-size:32px; font-weight:bold; color:#e6edf3; }
-  .clima-info { font-size:12px; color:#8b949e; margin-top:4px; }
-  .node-info-row {
+  .news-item a { color:#c9d1d9; text-decoration:none; }
+  .news-item a:hover { color:#58a6ff; }
+  .news-source { font-size:10px; color:#8b949e; margin-bottom:2px; }
+
+  /* GRAFICO FUTUROS */
+  .futuros-topo {
     display:flex;
-    justify-content:space-between;
-    padding:3px 0;
-    border-bottom:1px solid #21262d;
+    align-items:center;
+    gap:8px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+  }
+  .futuros-preco {
+    margin-left:auto;
     font-size:12px;
-  }
-  .node-info-row:last-child { border-bottom:none; }
-  .badge {
-    display:inline-block;
-    padding:2px 6px;
-    border-radius:3px;
-    font-size:10px;
+    color:#e6edf3;
     font-weight:bold;
-    margin-right:4px;
   }
-  .badge-green  { background:#1a3a1a; color:#3fb950; border:1px solid #3fb950; }
-  .badge-blue   { background:#0d2137; color:#58a6ff; border:1px solid #58a6ff; }
-  .badge-yellow { background:#2d2000; color:#d29922; border:1px solid #d29922; }
-  .btn-vid {
+  #tv_futuros_container {
+    height:320px;
+    width:100%;
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .btn-tela-cheia {
     background:#21262d;
     border:1px solid #30363d;
     color:#c9d1d9;
-    padding:5px 10px;
+    padding:5px 8px;
     border-radius:4px;
     cursor:pointer;
     font-family:monospace;
-    font-size:11px;
+    font-size:13px;
+    line-height:1;
   }
-  .btn-vid:active { background:#30363d; }
-  .btn-vid.ativo { border-color:#58a6ff; color:#58a6ff; }
+  .btn-tela-cheia:active { background:#30363d; }
+
+  /* TELA CHEIA (Fullscreen API nativa) */
+  #card-futuros:fullscreen,
+  #card-futuros.tela-cheia {
+    display:flex;
+    flex-direction:column;
+    padding:10px;
+    background:#161b22;
+    width:100vw;
+    height:100vh;
+  }
+  #card-futuros:fullscreen #tv_futuros_container,
+  #card-futuros.tela-cheia #tv_futuros_container {
+    flex:1;
+    height:auto;
+  }
+
+  /* PING / SPEED TEST */
+  .net-resultado {
+    margin:6px 0;
+    font-size:13px;
+    min-height:16px;
+  }
+  .net-resultado .destaque {
+    font-size:16px;
+    font-weight:bold;
+    color:#e6edf3;
+  }
 </style>
 </head>
 <body>
 
-<!-- BARRA TOPO -->
-<div class="grid3">
-  <div class="card">
-    <div class="card-title">⏰ Hora</div>
-    <div class="value" id="hora">--:--:--</div>
-    <div class="small" id="data">---</div>
+<!-- MENU: Nodes | Home | Principal ....... Hora -->
+<nav class="menu">
+  <div class="dropdown" id="dd-nodes">
+    <button class="dropdown-btn" onclick="toggleDD('dd-nodes')">Nodes ▾</button>
+    <div class="dropdown-menu">
+      <a href="index.html">📡 Hub Central</a>
+      <a href="xt1033.html">📱 XT1033</a>
+      <a href="t395.html">📱 T395</a>
+      <a href="a02s.html">📱 A02S</a>
+      <a href="daninote.html">🖥️ DANINOTE</a>
+      <a href="i3win.html">🖥️ I3WIN</a>
+      <a href="hpwin.html">🖥️ HPWIN</a>
+      <a href="winceleron.html">🖥️ WIN-CELERON</a>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">🌐 IP Público</div>
-    <div class="small" id="ip">carregando...</div>
-    <div class="small" id="ip-pais"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">⚙️ Sistema</div>
-    <div class="small">HPWIN · Win10 LTSC</div>
-    <div class="small">AMD E1-1500 · 4GB</div>
-    <div class="small" id="uptime-label">0h 0m 0s</div>
-  </div>
-</div>
+  <a href="home.html" class="active">🏠 Home</a>
+  <a href="https://rene-dashboard.github.io/">⚡ Principal</a>
+  <span class="menu-hora" id="hora">--:--:--</span>
+</nav>
 
-<!-- NODE INFO -->
-<div class="card">
-  <div class="card-title">🖥️ Node Info — HPWIN</div>
-  <div class="grid2">
-    <div>
-      <div class="node-info-row">
-        <span class="small blue">Hostname</span>
-        <span class="small">hpwin</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">Tailscale</span>
-        <span class="small">hpwin.tailae532e.ts.net</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">IPv4</span>
-        <span class="small">100.76.116.116</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">SO</span>
-        <span class="small">Win10 IoT LTSC</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">CPU</span>
-        <span class="small">AMD E1-1500 1.48GHz</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">RAM</span>
-        <span class="small">4 GB</span>
-      </div>
-      <div class="node-info-row">
-        <span class="small blue">SSD</span>
-        <span class="small">Kingston 224 GB</span>
-      </div>
-    </div>
-    <div>
-      <div class="small" style="margin-bottom:6px">
-        <span class="badge badge-green">● ONLINE</span>
-      </div>
-      <div class="small" style="margin-bottom:4px">Apps ativos:</div>
-      <div><span class="badge badge-blue">Honeygain</span></div><br>
-      <div><span class="badge badge-blue">EarnApp</span></div><br>
-      <div><span class="badge badge-blue">Tailscale</span></div><br>
-      <div><span class="badge badge-yellow">TradingView</span></div><br>
-      <div><span class="badge badge-blue">OpenSSH</span></div>
+<!-- CONTEÚDO -->
+<div class="content">
+
+  <!-- CLIMA — faixa única -->
+  <div class="card">
+    <div class="clima-row" id="clima-row">
+      <span class="temp" id="temp">--°C</span>
+      <span class="sep">|</span>
+      <span id="clima-desc">carregando...</span>
+      <span class="sep">|</span>
+      <span id="clima-vento">💨 --</span>
+      <span class="sep">|</span>
+      <span id="clima-umidade">💧 --</span>
+      <span class="sep">|</span>
+      <span class="prox" id="clima-horas"></span>
     </div>
   </div>
-</div>
 
-<!-- RADIO + CLIMA -->
-<div class="grid2">
+  <!-- RADIO — faixa única -->
   <div class="card">
-    <div class="card-title">
-      📻 Rádio
-      <span style="float:right;color:#8b949e;font-size:10px" id="radio-indice"></span>
-    </div>
-    <div>
+    <div class="radio-row">
       <span class="radio-dot" id="radio-dot"></span>
-      <span id="radio-status-txt">conectando...</span>
+      <span class="radio-nome" id="radio-nome">carregando...</span>
+      <select class="select-radio" id="select-radio" onchange="trocarPorSelect(this.value)"></select>
+      <div class="radio-controles">
+        <button class="btn" onclick="anterior()">⏮</button>
+        <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶</button>
+        <button class="btn" onclick="proxima()">⏭</button>
+      </div>
     </div>
-    <div class="radio-nome" id="radio-nome">---</div>
-    <div class="radio-qualidade" id="radio-qualidade"></div>
-    <select class="select-estacao" id="select-estacao"
-            onchange="trocarPorSelect(this.value)"></select>
-    <div class="radio-controles">
-      <button class="btn" onclick="anterior()">⏮</button>
-      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">⏸ Pausar</button>
-      <button class="btn" onclick="proxima()">⏭</button>
+    <div class="volume-row">
+      <span class="icone" id="volume-icone">🔊</span>
+      <input type="range" id="volume-slider" min="0" max="100" value="40" oninput="ajustarVolume(this.value)">
+      <span class="volume-valor" id="volume-valor">40%</span>
     </div>
     <audio id="radio" preload="none"></audio>
   </div>
 
-  <div class="card">
-    <div class="card-title">🌡️ Clima</div>
-    <div class="clima-temp" id="temp">--°C</div>
-    <div class="clima-info" id="clima-desc">carregando...</div>
-    <div class="clima-info" id="clima-vento"></div>
-    <div class="clima-info" id="clima-umidade"></div>
-    <div class="clima-info" id="clima-chuva"></div>
-    <br>
-    <div class="card-title">📅 Próximas horas</div>
-    <div id="clima-horas" class="small"></div>
+  <!-- GRAFICO FUTUROS (TradingView, leve e gratuito) -->
+  <div class="card" id="card-futuros">
+    <div class="card-title">📈 Gráfico</div>
+    <div class="futuros-topo">
+      <select class="select-radio" id="select-futuros" style="max-width:120px;" onchange="trocarGraficoFuturos(this.value)"></select>
+      <span class="futuros-preco" id="futuros-preco-brl"></span>
+      <button class="btn-tela-cheia" id="btn-tela-cheia-futuros" onclick="toggleTelaCheiaFuturos()">⛶</button>
+    </div>
+    <div id="tv_futuros_container"></div>
   </div>
-</div>
 
-<!-- CRIPTO + NOTICIAS -->
-<div class="grid2">
-  <div class="card">
-    <div class="card-title">💰 Cripto (USD)</div>
-    <div id="crypto-container"><div class="small">carregando...</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">📰 Notícias BBC</div>
-    <div id="news-container"><div class="small">carregando...</div></div>
-  </div>
-</div>
+  <!-- CRIPTO + NOTICIAS -->
+  <div class="grid2">
 
-<!-- VIDEO -->
-<div class="card">
-  <div class="card-title">🎬 Vídeo Ambiente — <span id="vid-label" style="color:#8b949e;font-weight:normal">Lareira</span></div>
-  <div class="video-wrapper">
-    <iframe id="yt-frame" src="about:blank"
-      allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
-  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-    <!-- IDs diretos de vídeo — youtube-nocookie sem restrição de embed -->
-    <!-- 🔥 ZOAExL-xIDM  Fireplace 4K 10h crackling                    -->
-    <!-- 📺 hIRiKgFGMe4  ABC Saturday Morning Cartoons 1988 full eps   -->
-    <!-- 🌊 9AnAI85c608  Calming Sea 8h 4K ASMR                        -->
-    <!-- 🌿 eNUpTV9BGac  Forest In 4K Scenic Relaxation                -->
-    <!-- 🌧️ xPHiHTmt2FU  Rain on City Street 8h 4K ASMR               -->
-    <!-- 🌃 0-hYl2cZB0E  Rainy Night City View 8h                      -->
-    <!-- 🎵 jfKfPfyJRdk  Lofi Girl beats to relax/study                -->
-    <button class="btn-vid ativo"  id="btn-lareira"  onclick="trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira')">🔥 Lareira</button>
-    <button class="btn-vid"        id="btn-cartoons" onclick="trocarVideo('hIRiKgFGMe4','Cartoons 80s','btn-cartoons')">📺 Cartoons</button>
-    <button class="btn-vid"        id="btn-oceano"   onclick="trocarVideo('9AnAI85c608','Oceano','btn-oceano')">🌊 Oceano</button>
-    <button class="btn-vid"        id="btn-floresta" onclick="trocarVideo('eNUpTV9BGac','Floresta','btn-floresta')">🌿 Floresta</button>
-    <button class="btn-vid"        id="btn-chuva"    onclick="trocarVideo('xPHiHTmt2FU','Chuva','btn-chuva')">🌧️ Chuva</button>
-    <button class="btn-vid"        id="btn-cidade"   onclick="trocarVideo('0-hYl2cZB0E','Cidade','btn-cidade')">🌃 Cidade</button>
-    <button class="btn-vid"        id="btn-lofi"     onclick="trocarVideo('jfKfPfyJRdk','Lofi','btn-lofi')">🎵 Lofi</button>
-  </div>
-</div>
+    <div class="card">
+      <div class="card-title">💰 Cripto (USD)</div>
+      <div id="crypto-container"><div class="small">carregando...</div></div>
+    </div>
 
-<!-- RELOAD INFO -->
-<div class="card">
-  <div class="small" id="reload-info"></div>
-</div>
+    <div class="card">
+      <div class="card-title">📰 Notícias pt-BR</div>
+      <select class="select-news" id="select-news" onchange="trocarFeedNoticias(this.value)">
+        <option value="g1">🇧🇷 G1 — Geral</option>
+        <option value="tecnologia">💻 G1 — Tecnologia</option>
+        <option value="agenciabrasil">🇧🇷 Agência Brasil</option>
+        <option value="cnnbrasil">🇧🇷 CNN Brasil</option>
+      </select>
+      <div id="news-container"><div class="small">carregando...</div></div>
+    </div>
+
+  </div>
+
+  <!-- PING + SPEED TEST -->
+  <div class="grid2">
+
+    <div class="card">
+      <div class="card-title">📶 Ping Test</div>
+      <div class="small" id="ping-status">pronto para testar</div>
+      <div class="net-resultado" id="ping-resultado"></div>
+      <button class="btn btn-block" id="btn-ping" onclick="testarPing()">▶ Testar Ping</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚀 Speed Test</div>
+      <div class="small" id="speed-status">pronto para testar (10MB via Cloudflare)</div>
+      <div class="net-resultado" id="speed-resultado"></div>
+      <button class="btn btn-block" id="btn-speed" onclick="testarVelocidade()">▶ Testar Velocidade</button>
+    </div>
+
+  </div>
+
+</div><!-- fim content -->
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────
 const LAT = -23.55;
 const LON = -46.63;
-const RELOAD_HORAS = 6;
 
 const ESTACOES = [
-  { nome:'BBC World Service',        qualidade:'MP3 · News',
-    url:'https://stream.live.vc.bbcmedia.co.uk/bbc_world_service' },
-  { nome:'RADIO BOB Classic Rock',   qualidade:'MP3 192kbps',
-    url:'https://streams.radiobob.de/bob-classicrock/mp3-192/streams.radiobob.de/' },
-  { nome:'RADIO BOB Classic Rock',   qualidade:'MP3 128kbps',
-    url:'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
-  { nome:'RADIO BOB Classic Rock',   qualidade:'AAC 64kbps',
-    url:'https://streams.radiobob.de/bob-classicrock/aac-64/streams.radiobob.de/' },
-  { nome:'RADIO BOB National',       qualidade:'MP3 192kbps',
-    url:'https://streams.radiobob.de/bob-national/mp3-192/streams.radiobob.de/' },
-  { nome:'RADIO BOB National',       qualidade:'MP3 128kbps',
-    url:'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
-  { nome:'STAR FM Classic Rock',     qualidade:'MP3 192kbps',
-    url:'https://stream.starfm.de/classic/mp3-192/stream.starfm.de/' },
-  { nome:'STAR FM Classic Rock',     qualidade:'MP3 128kbps',
-    url:'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
-  { nome:'STAR FM Classic Rock',     qualidade:'AAC 64kbps',
-    url:'https://stream.starfm.de/classic/aac-64/stream.starfm.de/' },
-  { nome:'STAR FM Country Rock',     qualidade:'MP3 192kbps',
-    url:'https://stream.starfm.de/country/mp3-192/stream.starfm.de/' },
-  { nome:'STAR FM Country Rock',     qualidade:'MP3 128kbps',
-    url:'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
-  { nome:'Big R Radio 80s Metal',    qualidade:'MP3 128kbps',
-    url:'http://bigrradio.cdnstream1.com/5186_128' },
-  { nome:'Big R Radio 90s Alt Rock', qualidade:'MP3 128kbps',
-    url:'http://bigrradio.cdnstream1.com/5187_128' },
+  { nome:'Radio Paradise Rock',    qualidade:'MP3 128kbps', url:'http://stream.radioparadise.com/rock-128' },
+  { nome:'RADIO BOB Classic Rock', qualidade:'MP3 128kbps', url:'https://streams.radiobob.de/bob-classicrock/mp3-128/streams.radiobob.de/' },
+  { nome:'RADIO BOB Classic Rock', qualidade:'AAC 64kbps',  url:'https://streams.radiobob.de/bob-classicrock/aac-64/streams.radiobob.de/' },
+  { nome:'RADIO BOB National',     qualidade:'MP3 128kbps', url:'https://streams.radiobob.de/bob-national/mp3-128/streams.radiobob.de/' },
+  { nome:'STAR FM Classic Rock',   qualidade:'MP3 128kbps', url:'https://stream.starfm.de/classic/mp3-128/stream.starfm.de/' },
+  { nome:'STAR FM Classic Rock',   qualidade:'AAC 64kbps',  url:'https://stream.starfm.de/classic/aac-64/stream.starfm.de/' },
+  { nome:'STAR FM Country Rock',   qualidade:'MP3 128kbps', url:'https://stream.starfm.de/country/mp3-128/stream.starfm.de/' },
+  { nome:'GotRadio Classic Rock',  qualidade:'AAC · HLS',   url:'https://pureplay.cdnstream1.com/6012_64.aac/playlist.m3u8' },
+  { nome:'Choice Classic Rock',    qualidade:'MP3 · Stream',url:'http://streamer.radio.co/s66f2626b4/listen.m3u' },
+  { nome:'Big R 80s Metal',        qualidade:'MP3 128kbps', url:'http://bigrradio.cdnstream1.com/5186_128' },
+  { nome:'Big R 90s Alt Rock',     qualidade:'MP3 128kbps', url:'http://bigrradio.cdnstream1.com/5187_128' },
 ];
 
-// ── RÁDIO ────────────────────────────────────────────────
-let estacaoAtual = 0, tocando = true;
+const FEEDS = {
+  g1:            'https://g1.globo.com/dynamo/rss2.xml',
+  tecnologia:    'https://g1.globo.com/dynamo/tecnologia/rss2.xml',
+  agenciabrasil: 'https://agenciabrasil.ebc.com.br/rss.xml',
+  cnnbrasil:     'https://www.cnnbrasil.com.br/feed/',
+};
+// ─────────────────────────────────────────────────────────
+
+// ── MENU DROPDOWN ────────────────────────────────────────
+function toggleDD(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown')) {
+    document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// ── RELÓGIO (dentro do menu) ─────────────────────────────
+function atualizarHora() {
+  document.getElementById('hora').textContent = new Date().toLocaleTimeString('pt-BR');
+}
+atualizarHora();
+setInterval(atualizarHora, 1000);
+
+// ── CLIMA (Open-Meteo) — faixa única ─────────────────────
+const WMO = {
+  0:'☀️ Céu limpo', 1:'🌤️ Poucas nuvens', 2:'⛅ Parc. nublado', 3:'☁️ Nublado',
+  45:'🌫️ Neblina', 48:'🌫️ Neblina', 51:'🌦️ Garoa leve', 53:'🌦️ Garoa',
+  55:'🌦️ Garoa forte', 61:'🌧️ Chuva leve', 63:'🌧️ Chuva', 65:'🌧️ Chuva forte',
+  71:'🌨️ Neve leve', 73:'🌨️ Neve', 75:'🌨️ Neve forte', 80:'🌦️ Pancadas',
+  81:'🌧️ Pancadas', 82:'⛈️ Pancadas fortes', 95:'⛈️ Tempestade', 96:'⛈️ Tempestade c/ granizo'
+};
+function descWMO(code) { return WMO[code] || '🌡️ —'; }
+
+async function atualizarClima() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code` +
+      `&hourly=temperature_2m,weather_code&timezone=auto`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const cur = d.current;
+    document.getElementById('temp').textContent = Math.round(cur.temperature_2m) + '°C';
+    document.getElementById('clima-desc').textContent = descWMO(cur.weather_code);
+    document.getElementById('clima-vento').textContent = '💨 ' + cur.wind_speed_10m + ' km/h';
+    document.getElementById('clima-umidade').textContent = '💧 ' + cur.relative_humidity_2m + '%';
+
+    const agora = new Date();
+    const idx = d.hourly.time.findIndex(t => new Date(t) > agora);
+    const partes = [];
+    for (let i = idx; i < idx + 4 && i < d.hourly.time.length; i++) {
+      const h = new Date(d.hourly.time[i]).getHours().toString().padStart(2,'0') + 'h';
+      const t = Math.round(d.hourly.temperature_2m[i]) + '°';
+      partes.push(`<b>${h}</b> ${t}`);
+    }
+    document.getElementById('clima-horas').innerHTML = partes.join('  ');
+  } catch (e) {
+    document.getElementById('clima-desc').textContent = 'erro ao consultar clima';
+  }
+}
+atualizarClima();
+setInterval(atualizarClima, 10 * 60 * 1000);
+
+// ── CRIPTO (CoinGecko) ───────────────────────────────────
+const MOEDAS = { bitcoin:'BTC', ethereum:'ETH', tether:'USDT', binancecoin:'BNB', solana:'SOL', litecoin:'LTC' };
+async function atualizarCripto() {
+  try {
+    const ids = Object.keys(MOEDAS).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const box = document.getElementById('crypto-container');
+    box.innerHTML = '';
+    const lista = Object.entries(MOEDAS)
+      .filter(([id]) => d[id])
+      .map(([id, sigla]) => ({
+        sigla,
+        preco: d[id].usd,
+        variacao: d[id].usd_24h_change ?? 0
+      }))
+      .sort((a, b) => b.variacao - a.variacao); // maior alta -> maior queda
+    lista.forEach(({ sigla, preco, variacao }) => {
+      const cor = variacao >= 0 ? 'green' : 'red';
+      const seta = variacao >= 0 ? '▲' : '▼';
+      box.insertAdjacentHTML('beforeend',
+        `<div class="crypto-row"><span>${sigla}</span><span>$${preco.toLocaleString('en-US')}
+          <span class="${cor}">${seta}${Math.abs(variacao).toFixed(1)}%</span></span></div>`);
+    });
+  } catch (e) {
+    document.getElementById('crypto-container').innerHTML = '<div class="small">erro ao consultar cripto</div>';
+  }
+}
+atualizarCripto();
+setInterval(atualizarCripto, 60 * 1000);
+
+// ── NOTÍCIAS (RSS via allorigins + DOMParser) ────────────
+let feedAtual = 'g1';
+async function atualizarNoticias() {
+  const box = document.getElementById('news-container');
+  box.innerHTML = '<div class="small">carregando...</div>';
+  try {
+    const feedUrl = FEEDS[feedAtual];
+    const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(feedUrl);
+    const r = await fetch(proxied);
+    const texto = await r.text();
+    const xml = new DOMParser().parseFromString(texto, 'text/xml');
+    const itens = Array.from(xml.querySelectorAll('item')).slice(0, 8);
+    box.innerHTML = '';
+    if (itens.length === 0) throw new Error('feed vazio');
+    itens.forEach(item => {
+      const titulo = item.querySelector('title')?.textContent || '(sem título)';
+      const link = item.querySelector('link')?.textContent || '#';
+      box.insertAdjacentHTML('beforeend',
+        `<div class="news-item"><div class="news-source">${feedAtual.toUpperCase()}</div>
+         <a href="${link}" target="_blank">${titulo}</a></div>`);
+    });
+  } catch (e) {
+    box.innerHTML = '<div class="small">erro ao consultar notícias</div>';
+  }
+}
+function trocarFeedNoticias(chave) {
+  feedAtual = chave;
+  atualizarNoticias();
+}
+atualizarNoticias();
+setInterval(atualizarNoticias, 10 * 60 * 1000);
+
+// ── GRAFICO FUTUROS (TradingView) ────────────────────────
+// TradingView oferece um widget de gráfico gratuito, sem login, que carrega
+// só o chart (muito mais leve que abrir a página inteira da Binance).
+// Símbolo usado é o mesmo dos futuros perpétuos da Binance (ex: SOLUSDT.P),
+// já que a Binance Futures não tem contrato nativo em BRL — por isso o rótulo
+// do seletor mostra "/BRL" (preço de referência convertido ao lado) mas o
+// gráfico em si segue cotado em USDT, igual ao link de exemplo enviado.
+const MOEDAS_FUTUROS = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', SOL:'solana', LTC:'litecoin' };
+
+function popularSelectFuturos() {
+  const sel = document.getElementById('select-futuros');
+  Object.keys(MOEDAS_FUTUROS).forEach(sigla => {
+    const opt = document.createElement('option');
+    opt.value = sigla;
+    opt.textContent = sigla + '/USDT';
+    sel.appendChild(opt);
+  });
+  // opção extra: USDT/BRL é par spot (não existe futuro USDT/BRL na Binance)
+  const optBRL = document.createElement('option');
+  optBRL.value = 'USDTBRL';
+  optBRL.textContent = 'USDT/BRL';
+  sel.appendChild(optBRL);
+
+  // restaura a última moeda escolhida (persiste mesmo fechando o navegador/app)
+  const opcoesValidas = [...Object.keys(MOEDAS_FUTUROS), 'USDTBRL'];
+  const salva = localStorage.getItem('grafico_moeda');
+  sel.value = opcoesValidas.includes(salva) ? salva : 'BTC';
+}
+
+function carregarGraficoFuturos(sigla) {
+  const container = document.getElementById('tv_futuros_container');
+  container.innerHTML = '';
+  const symbol = sigla === 'USDTBRL' ? 'BINANCE:USDTBRL' : 'BINANCE:' + sigla + 'USDT.P';
+  new TradingView.widget({
+    "autosize": true,
+    "symbol": symbol,
+    "interval": "15",
+    "timezone": "America/Sao_Paulo",
+    "theme": "dark",
+    "style": "1",
+    "locale": "br",
+    "toolbar_bg": "#161b22",
+    "enable_publishing": false,
+    "hide_side_toolbar": true,
+    "allow_symbol_change": false,
+    "save_image": false,
+    "container_id": "tv_futuros_container"
+  });
+}
+
+async function atualizarPrecoLateral(sigla) {
+  const el = document.getElementById('futuros-preco-brl');
+  el.textContent = '...';
+  try {
+    if (sigla === 'USDTBRL') {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=brl');
+      const d = await r.json();
+      el.textContent = 'R$ ' + d.tether.brl.toLocaleString('pt-BR', { maximumFractionDigits: 4 });
+    } else {
+      const id = MOEDAS_FUTUROS[sigla];
+      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+      const d = await r.json();
+      el.textContent = '$' + d[id].usd.toLocaleString('en-US');
+    }
+  } catch (e) {
+    el.textContent = '';
+  }
+}
+
+function trocarGraficoFuturos(sigla) {
+  localStorage.setItem('grafico_moeda', sigla);
+  carregarGraficoFuturos(sigla);
+  atualizarPrecoLateral(sigla);
+}
+
+// ── TELA CHEIA DO GRÁFICO (Fullscreen API nativa) ────────
+let futurosTelaCheia = false;
+function toggleTelaCheiaFuturos() {
+  const card = document.getElementById('card-futuros');
+  if (!document.fullscreenElement) {
+    (card.requestFullscreen || card.webkitRequestFullscreen || card.mozRequestFullScreen)
+      .call(card).catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const card = document.getElementById('card-futuros');
+  futurosTelaCheia = document.fullscreenElement === card;
+  card.classList.toggle('tela-cheia', futurosTelaCheia);
+  document.getElementById('btn-tela-cheia-futuros').textContent = futurosTelaCheia ? '✕' : '⛶';
+  // recarrega o widget para ele recalcular o tamanho (autosize) no novo container
+  setTimeout(() => {
+    carregarGraficoFuturos(document.getElementById('select-futuros').value);
+  }, 100);
+});
+
+popularSelectFuturos();
+
+// ── PING TEST (Cloudflare trace endpoint) ────────────────
+let pingando = false;
+async function testarPing() {
+  if (pingando) return;
+  pingando = true;
+  const btn = document.getElementById('btn-ping');
+  const status = document.getElementById('ping-status');
+  const resultado = document.getElementById('ping-resultado');
+  btn.disabled = true;
+  status.textContent = 'testando... (5 amostras)';
+  resultado.innerHTML = '';
+
+  const alvo = 'https://speed.cloudflare.com/cdn-cgi/trace';
+  const tempos = [];
+  for (let i = 0; i < 5; i++) {
+    try {
+      const t0 = performance.now();
+      await fetch(alvo, { cache: 'no-store', mode: 'cors' });
+      tempos.push(performance.now() - t0);
+    } catch (e) {
+      // amostra falhou, ignora e segue
+    }
+    status.textContent = `testando... (${i + 1}/5)`;
+  }
+
+  if (tempos.length === 0) {
+    status.textContent = 'erro: nenhuma resposta (verifique a conexão)';
+    btn.disabled = false;
+    pingando = false;
+    return;
+  }
+
+  const min = Math.min(...tempos);
+  const max = Math.max(...tempos);
+  const media = tempos.reduce((a, b) => a + b, 0) / tempos.length;
+  const corMedia = media < 100 ? 'green' : media < 250 ? '' : 'red';
+
+  status.textContent = `${tempos.length}/5 respostas · alvo: Cloudflare edge`;
+  resultado.innerHTML =
+    `min <b>${min.toFixed(0)}ms</b> &nbsp;|&nbsp; méd <b class="${corMedia}">${media.toFixed(0)}ms</b> &nbsp;|&nbsp; max <b>${max.toFixed(0)}ms</b>`;
+
+  btn.disabled = false;
+  pingando = false;
+}
+
+// ── SPEED TEST (download via Cloudflare) ─────────────────
+let testandoVelocidade = false;
+async function testarVelocidade() {
+  if (testandoVelocidade) return;
+  testandoVelocidade = true;
+  const btn = document.getElementById('btn-speed');
+  const status = document.getElementById('speed-status');
+  const resultado = document.getElementById('speed-resultado');
+  btn.disabled = true;
+  resultado.innerHTML = '';
+
+  const bytesAlvo = 10 * 1024 * 1024; // 10MB
+  const url = `https://speed.cloudflare.com/__down?bytes=${bytesAlvo}`;
+  status.textContent = 'baixando arquivo de teste (10MB)...';
+
+  try {
+    const t0 = performance.now();
+    const r = await fetch(url, { cache: 'no-store' });
+    const blob = await r.blob();
+    const segundos = (performance.now() - t0) / 1000;
+    const mbps = (blob.size * 8) / segundos / 1_000_000;
+
+    status.textContent = `${(blob.size / 1024 / 1024).toFixed(1)}MB em ${segundos.toFixed(1)}s`;
+    resultado.innerHTML = `<span class="destaque">${mbps.toFixed(1)} Mbps</span> ↓ download`;
+  } catch (e) {
+    status.textContent = 'erro ao testar velocidade';
+  }
+
+  btn.disabled = false;
+  testandoVelocidade = false;
+}
+
+// ── VOLUME ────────────────────────────────────────────────
+function ajustarVolume(valor) {
+  radio.volume = valor / 100;
+  document.getElementById('volume-valor').textContent = valor + '%';
+  const icone = document.getElementById('volume-icone');
+  if (valor == 0) icone.textContent = '🔇';
+  else if (valor < 50) icone.textContent = '🔉';
+  else icone.textContent = '🔊';
+}
+
+// ── RÁDIO — carrega mas não toca sozinho (autoplay é bloqueado sem gesto) ─
+let estacaoAtual = 0, tocando = false;
 const radio = document.getElementById('radio');
-const sel = document.getElementById('select-estacao');
+const sel = document.getElementById('select-radio');
+
+radio.volume = 0.4; // volume inicial em 40%, ajustável pelo slider
 
 ESTACOES.forEach((e,i) => {
   const opt = document.createElement('option');
   opt.value = i;
-  opt.textContent = `${e.nome} — ${e.qualidade}`;
+  opt.textContent = e.nome;
   sel.appendChild(opt);
 });
 
 function atualizarUIRadio() {
-  const e = ESTACOES[estacaoAtual];
-  document.getElementById('radio-nome').textContent = e.nome;
-  document.getElementById('radio-qualidade').textContent = e.qualidade;
-  document.getElementById('radio-indice').textContent =
-    `${estacaoAtual+1}/${ESTACOES.length}`;
+  document.getElementById('radio-nome').textContent = ESTACOES[estacaoAtual].nome;
   sel.value = estacaoAtual;
 }
 
-function carregarEstacao(idx) {
+function carregarEstacao(idx, autoplay) {
   estacaoAtual = (idx + ESTACOES.length) % ESTACOES.length;
   radio.src = ESTACOES[estacaoAtual].url;
   radio.load();
-  if (tocando) radio.play().catch(()=>{});
   atualizarUIRadio();
-  setStatus('amarelo','conectando...');
+  if (autoplay) {
+    tocando = true;
+    radio.play().catch(()=>{ setStatus('erro'); });
+    setStatus('amarelo');
+  } else {
+    tocando = false;
+    setStatus('parado');
+  }
 }
 
-function proxima()  { carregarEstacao(estacaoAtual+1); }
-function anterior() { carregarEstacao(estacaoAtual-1); }
-function trocarPorSelect(idx) { carregarEstacao(parseInt(idx)); }
+function proxima()  { carregarEstacao(estacaoAtual+1, tocando); }
+function anterior() { carregarEstacao(estacaoAtual-1, tocando); }
+function trocarPorSelect(idx) { carregarEstacao(parseInt(idx), tocando); }
 
 function togglePlay() {
   if (radio.paused) {
     tocando = true;
-    radio.play().catch(()=>{});
-    document.getElementById('btn-play').textContent = '⏸ Pausar';
-    document.getElementById('btn-play').classList.remove('pausado');
+    if (!radio.src) radio.src = ESTACOES[estacaoAtual].url;
+    radio.play().catch(()=>{ setStatus('erro'); });
+    document.getElementById('btn-play').textContent = '⏸';
+    document.getElementById('btn-play').classList.add('tocando');
   } else {
     tocando = false;
     radio.pause();
-    document.getElementById('btn-play').textContent = '▶ Tocar';
-    document.getElementById('btn-play').classList.add('pausado');
-    setStatus('vermelho','pausado');
+    document.getElementById('btn-play').textContent = '▶';
+    document.getElementById('btn-play').classList.remove('tocando');
+    setStatus('parado');
   }
 }
 
-function setStatus(cor, txt) {
-  const cores = { verde:'#3fb950', amarelo:'#d29922', vermelho:'#f85149' };
-  document.getElementById('radio-dot').style.background = cores[cor];
-  document.getElementById('radio-status-txt').textContent = txt;
+function setStatus(estado) {
+  const dot = document.getElementById('radio-dot');
+  dot.className = 'radio-dot' + (estado === 'verde' ? ' tocando' : estado === 'erro' ? ' erro' : '');
 }
 
 radio.addEventListener('playing', () => {
-  setStatus('verde','ao vivo ✓');
-  document.getElementById('btn-play').textContent = '⏸ Pausar';
-  document.getElementById('btn-play').classList.remove('pausado');
+  setStatus('verde');
+  document.getElementById('btn-play').textContent = '⏸';
+  document.getElementById('btn-play').classList.add('tocando');
   tocando = true;
 });
 radio.addEventListener('error', () => {
-  setStatus('vermelho','erro — reconectando em 8s...');
-  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 8000);
+  setStatus('erro');
+  setTimeout(()=>{ if (tocando) carregarEstacao(estacaoAtual, true); }, 8000);
 });
 radio.addEventListener('stalled', () => {
-  setStatus('amarelo','buffering...');
-  setTimeout(()=>{ if(tocando) carregarEstacao(estacaoAtual); }, 5000);
+  if (!tocando) return;
+  setStatus('amarelo');
+  setTimeout(()=>{ if (tocando) carregarEstacao(estacaoAtual, true); }, 5000);
 });
 setInterval(()=>{
-  if (tocando && (radio.paused || radio.readyState===0)) {
-    setStatus('amarelo','watchdog — reiniciando...');
-    carregarEstacao(estacaoAtual);
+  if (tocando && (radio.paused || radio.readyState === 0)) {
+    carregarEstacao(estacaoAtual, true);
   }
 }, 30000);
 
-carregarEstacao(2); // RADIO BOB Classic Rock 128kbps
-
-// ── VÍDEO ────────────────────────────────────────────────
-let btnAtivo = 'btn-lareira';
-
-function trocarVideo(videoId, label, btnId) {
-  const prev = document.getElementById(btnAtivo);
-  if (prev) prev.classList.remove('ativo');
-  const curr = document.getElementById(btnId);
-  if (curr) curr.classList.add('ativo');
-  btnAtivo = btnId;
-  document.getElementById('vid-label').textContent = label;
-  // youtube-nocookie: menos bloqueios de embed, sem cookies
-  document.getElementById('yt-frame').src =
-    `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&rel=0&modestbranding=1`;
-}
-
-// Carregar lareira ao iniciar
-setTimeout(() => trocarVideo('ZOAExL-xIDM','Lareira','btn-lareira'), 1000);
-
-// ── HORA ─────────────────────────────────────────────────
-function atualizarHora() {
-  const agora = new Date();
-  document.getElementById('hora').textContent =
-    agora.toLocaleTimeString('pt-BR');
-  document.getElementById('data').textContent =
-    agora.toLocaleDateString('pt-BR',
-      {weekday:'short',day:'2-digit',month:'short'});
-}
-setInterval(atualizarHora, 1000);
-atualizarHora();
-
-// ── UPTIME ───────────────────────────────────────────────
-const startTime = Date.now();
-setInterval(()=>{
-  const d = Math.floor((Date.now()-startTime)/1000);
-  const h = Math.floor(d/3600);
-  const m = Math.floor((d%3600)/60);
-  const s = d%60;
-  document.getElementById('uptime-label').textContent = `${h}h ${m}m ${s}s`;
-},1000);
-
-const proxReload = new Date(Date.now() + RELOAD_HORAS*3600000);
-document.getElementById('reload-info').textContent =
-  `Próximo reload: ${proxReload.toLocaleTimeString('pt-BR')}`;
-
-// ── IP ───────────────────────────────────────────────────
-function buscarIP() {
-  fetch('https://ipapi.co/json/')
-    .then(r=>r.json())
-    .then(d=>{
-      document.getElementById('ip').textContent = d.ip||'erro';
-      document.getElementById('ip-pais').textContent =
-        `${d.city||''}, ${d.country_name||''}`;
-    })
-    .catch(()=>{ document.getElementById('ip').textContent='offline'; });
-}
-buscarIP();
-setInterval(buscarIP, 600000);
-
-// ── CLIMA ────────────────────────────────────────────────
-function buscarClima() {
-  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current_weather=true&hourly=relativehumidity_2m,precipitation_probability,temperature_2m&forecast_days=1&timezone=auto`)
-    .then(r=>r.json())
-    .then(d=>{
-      const w = d.current_weather;
-      document.getElementById('temp').textContent = `${w.temperature}°C`;
-      document.getElementById('clima-desc').textContent = interpretarClima(w.weathercode);
-      document.getElementById('clima-vento').textContent = `💨 Vento: ${w.windspeed} km/h`;
-      const horaAtual = new Date().getHours();
-      if (d.hourly) {
-        const umidade = d.hourly.relativehumidity_2m?.[horaAtual];
-        const chuva   = d.hourly.precipitation_probability?.[horaAtual];
-        if (umidade != null)
-          document.getElementById('clima-umidade').textContent = `💧 Umidade: ${umidade}%`;
-        if (chuva != null)
-          document.getElementById('clima-chuva').textContent = `🌂 Chuva: ${chuva}%`;
-        let horasHtml = '';
-        for (let i = 0; i < 4; i++) {
-          const idx = horaAtual + i;
-          const temp = d.hourly.temperature_2m?.[idx] ?? '--';
-          horasHtml += `<span style="margin-right:12px">+${i}h: ${temp}°C</span>`;
-        }
-        document.getElementById('clima-horas').innerHTML = horasHtml;
-      }
-    })
-    .catch(()=>{ document.getElementById('clima-desc').textContent='sem dados'; });
-}
-function interpretarClima(c) {
-  const m = {
-    0:'☀️ Céu limpo',1:'🌤️ Poucas nuvens',2:'⛅ Parcialmente nublado',
-    3:'☁️ Nublado',45:'🌫️ Névoa',48:'🌫️ Névoa',51:'🌦️ Garoa leve',
-    53:'🌦️ Garoa',61:'🌧️ Chuva leve',63:'🌧️ Chuva',65:'🌧️ Chuva forte',
-    80:'🌦️ Pancadas',95:'⛈️ Tempestade',99:'⛈️ Tempestade'
-  };
-  return m[c]||`Cód ${c}`;
-}
-buscarClima();
-setInterval(buscarClima, 900000);
-
-// ── CRIPTO ───────────────────────────────────────────────
-function buscarCripto() {
-  const ids = 'bitcoin,ethereum,tether,solana,litecoin,binancecoin';
-  fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
-    .then(r=>r.json())
-    .then(d=>{
-      const moedas = [
-        {id:'bitcoin',nome:'BTC'},{id:'ethereum',nome:'ETH'},
-        {id:'tether',nome:'USDT'},{id:'solana',nome:'SOL'},
-        {id:'litecoin',nome:'LTC'},{id:'binancecoin',nome:'BNB'},
-      ];
-      let html = '';
-      moedas.forEach(m=>{
-        const info = d[m.id]; if(!info) return;
-        const preco = info.usd.toLocaleString('en-US',{style:'currency',currency:'USD'});
-        const ch = (info.usd_24h_change||0).toFixed(2);
-        const cor = parseFloat(ch)>=0?'green':'red';
-        const sinal = parseFloat(ch)>=0?'+':'';
-        html+=`<div class="crypto-row">
-          <span>${m.nome}</span><span>${preco}</span>
-          <span class="${cor}">${sinal}${ch}%</span></div>`;
-      });
-      document.getElementById('crypto-container').innerHTML = html;
-    })
-    .catch(()=>{
-      document.getElementById('crypto-container').innerHTML=
-        '<div class="small red">API indisponível</div>';
-    });
-}
-buscarCripto();
-setInterval(buscarCripto, 300000);
-
-// ── NOTÍCIAS — allorigins + DOMParser ────────────────────
-function buscarNoticias() {
-  const rss = encodeURIComponent('https://feeds.bbci.co.uk/news/world/rss.xml');
-  fetch(`https://api.allorigins.win/get?url=${rss}`)
-    .then(r=>r.json())
-    .then(d=>{
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(d.contents,'text/xml');
-      const items = xml.querySelectorAll('item');
-      let html = '', count = 0;
-      items.forEach(item=>{
-        if(count>=7) return;
-        const titulo = item.querySelector('title')?.textContent||'';
-        html+=`<div class="news-item"><span class="yellow">▸</span> ${titulo}</div>`;
-        count++;
-      });
-      document.getElementById('news-container').innerHTML =
-        html||'<div class="small">sem notícias</div>';
-    })
-    .catch(()=>{
-      document.getElementById('news-container').innerHTML=
-        '<div class="small red">sem conexão</div>';
-    });
-}
-buscarNoticias();
-setInterval(buscarNoticias, 600000);
+carregarEstacao(0, false); // carrega mas não toca
 </script>
+
+<!-- Biblioteca do widget TradingView — carregada só uma vez; ao terminar,
+     já inicializa o gráfico de futuros com BTC selecionado por padrão -->
+<script src="https://s3.tradingview.com/tv.js" onload="trocarGraficoFuturos(document.getElementById('select-futuros').value)"></script>
 </body>
 </html>
